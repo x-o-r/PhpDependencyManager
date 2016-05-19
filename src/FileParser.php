@@ -53,7 +53,7 @@ class ClassVisitor extends NodeVisitorAbstract
 
     public function leaveNode(Node $node)
     {
-        if ($node instanceof Node\Expr\New_ && method_exists($node->class, "toString")) { // @TODO : journaliser les instanciations dynamique "new $variable"
+        if ($node instanceof Node\Expr\New_ && $node->class instanceof Node\Name) {
             $this->classDTO->classesInstances[] = $node->class->toString();
         }
 

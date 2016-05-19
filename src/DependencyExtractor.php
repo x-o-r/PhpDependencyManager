@@ -1,8 +1,6 @@
 <?php
 namespace DependencyManager;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 use Hal\Component\File\Finder;
 
 class DependencyExtractor
@@ -13,11 +11,11 @@ class DependencyExtractor
     {
         return $this->classesDTOArray;
     }
-    
-    public function analyse()
+
+    public function analyse($path)
     {
         $finder = new Finder();
-        foreach ($finder->find(__DIR__ . "/../test") as $file)
+        foreach ($finder->find($path) as $file)
         {
             $parser = new FileParser();
             try
@@ -32,16 +30,4 @@ class DependencyExtractor
             $this->classesDTOArray[basename($file)] = $parsedClasses;
         }
     }
-}
-
-$dependencyExtractor = new DependencyExtractor();
-$dependencyExtractor->analyse();
-
-try
-{
-    $dataCreator = DataCreatorFactory::getInstance();
-    $dataCreator->createSchema($dependencyExtractor->getClassesDTOArray());
-} catch (Error $e)
-{
-    //
 }
