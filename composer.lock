@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5e8ecbeef9f6725bd6f001d0267857c9",
-    "content-hash": "18074f9ba112f65e7808a575c8c68c5d",
+    "hash": "d1041ee3180540ba1648c7466136bc01",
+    "content-hash": "39727b771eb748899e46f8df31acf175",
     "packages": [
         {
             "name": "graphaware/neo4j-response-formatter",

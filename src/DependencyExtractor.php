@@ -3,18 +3,22 @@ namespace PhpDependencyManager;
 
 use PhpDependencyManager\FileParser;
 use Hal\Component\File\Finder;
+use Exception;
 
 class DependencyExtractor
 {
     private $classesDTOArray = array();
+    private $componentsDTOArray = array();
 
-    public function getClassesDTOArray()
-    {
+    public function getClassesDTOArray() {
         return $this->classesDTOArray;
     }
 
-    public function analyse($path)
-    {
+    public function getComponentsDTOArray() {
+        return $this->componentsDTOArray;
+    }
+
+    public function analyseClassesDependencies($path) {
         $finder = new Finder();
         foreach ($finder->find($path) as $file)
         {
@@ -22,7 +26,7 @@ class DependencyExtractor
             try
             {
                 $parsedClasses = $parser->parse($file);
-            } catch (Error $e)
+            } catch (Exception $e)
             {
                 // @TODO : log
                 continue;
@@ -30,5 +34,8 @@ class DependencyExtractor
 
             $this->classesDTOArray[basename($file)] = $parsedClasses;
         }
+    }
+    public function analyseComponentsDependencies($composerJsonFile) {
+//        $this->$componentsDTOArray
     }
 }

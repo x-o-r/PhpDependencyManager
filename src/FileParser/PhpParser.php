@@ -1,6 +1,6 @@
 <?php
 namespace PhpDependencyManager\FileParser;
-
+use Exception;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
@@ -35,9 +35,9 @@ class PhpParser
 
             return $classesCollection;
 
-        } catch (Error $e)
+        } catch (Exception $e)
         {
-           Throw new Exception($e);
+           Throw $e;
         }
     }
 }

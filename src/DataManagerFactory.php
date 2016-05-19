@@ -1,5 +1,6 @@
 <?php
 namespace PhpDependencyManager;
+use Exception;
 use Neoxygen\NeoClient\ClientBuilder;
 
 class DataManagerFactory
@@ -12,9 +13,11 @@ class DataManagerFactory
                 ->addConnection('default', 'http', 'localhost', 7474, false)
                 ->setAutoFormatResponse(true)
                 ->build();
-        } catch (Error $e)
+
+            $neo4jClient->ping();
+        } catch (Exception $e)
         {
-            return null;
+            Throw new DataManagerException($e);
         }
         return new DataManager($neo4jClient);
     }
