@@ -1,8 +1,8 @@
 <?php
-namespace DependencyManager;
+namespace PhpDependencyManager;
 use Neoxygen\NeoClient\ClientBuilder;
 
-class DataCreatorFactory
+class DataManagerFactory
 {
     public static function getInstance()
     {
@@ -16,6 +16,6 @@ class DataCreatorFactory
         {
             return null;
         }
-        return new DataCreator($neo4jClient);
+        return new DataManager($neo4jClient);
     }
 }

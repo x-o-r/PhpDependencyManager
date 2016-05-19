@@ -1,6 +1,7 @@
 <?php
-namespace DependencyManager;
+namespace PhpDependencyManager;
 
+use PhpDependencyManager\FileParser;
 use Hal\Component\File\Finder;
 
 class DependencyExtractor
@@ -17,7 +18,7 @@ class DependencyExtractor
         $finder = new Finder();
         foreach ($finder->find($path) as $file)
         {
-            $parser = new FileParser();
+            $parser = new FileParser\PhpParser();
             try
             {
                 $parsedClasses = $parser->parse($file);

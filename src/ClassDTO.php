@@ -1,6 +1,6 @@
 <?php
 
-namespace DependencyManager;
+namespace PhpDependencyManager;
 
 class ClassDTO
 {

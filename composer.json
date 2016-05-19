@@ -1,9 +1,9 @@
 {
-    "name": "a/a",
+    "name": "xOrOx/PhpDependencyManager",
     "minimum-stability": "dev",
 	"autoload": {
        	"psr-4": {
-			"DependencyManager\\": "src/"
+			"PhpDependencyManager\\": "src/"
 		}
   	},
     "require": {
