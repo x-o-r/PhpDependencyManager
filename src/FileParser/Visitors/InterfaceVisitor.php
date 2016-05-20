@@ -1,17 +1,17 @@
 <?php
 
 namespace PhpDependencyManager\FileParser\Visitors;
-use PhpDependencyManager\ClassDTO;
+use PhpDependencyManager\DTO\InterfaceDTO;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
-class InterfaceVisitor extends NodeVisitorAbstract
+class InterfaceVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $classDTO;
+    private $interfaceDTO;
 
-    public function __construct(ClassDTO $classDTO)
+    public function __construct(InterfaceDTO $interfaceDTO)
     {
-        $this->classDTO = $classDTO;
+        $this->interfaceDTO = $interfaceDTO;
     }
 
     public function leaveNode(Node $node)
@@ -19,8 +19,8 @@ class InterfaceVisitor extends NodeVisitorAbstract
         //
     }
 
-    public function getClassDTO()
+    public function getDTO()
     {
-        return $this->classDTO;
+        return $this->interfaceDTO;
     }
 }

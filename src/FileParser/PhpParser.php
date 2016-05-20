@@ -15,26 +15,28 @@ class PhpParser
         $this->traverser = new NodeTraverser();
     }
 
+    /**
+     * @param $fileToParse
+     * @return array
+     * @throws Exception
+     */
     public function parse($fileToParse)
     {
         try{
             $visitor = new Visitors\FileVisitor();
             $this->traverser->addVisitor($visitor);
             $stmts = $this->parser->parse(file_get_contents($fileToParse));
-//            var_dump($stmts);
-
+//            var_dump($stmts); exit;
             $this->traverser->traverse($stmts);
             $this->traverser->removeVisitor($visitor);
-            $classesCollection = $visitor->getClassDTOCollection();
+            $DTOCollection = $visitor->getDTO();
 
-            // Ajout du namespace
-            foreach ($classesCollection as $classDTO)
+            foreach ($DTOCollection as $DTO) // @TODO : find a way to set namespace directly into the visitor
             {
-                $classDTO->namespace = $visitor->getNameSpace();
+                $DTO->setNamespace($visitor->getNamespace());
             }
 
-            return $classesCollection;
-
+            return $DTOCollection;
         } catch (Exception $e)
         {
            Throw $e;

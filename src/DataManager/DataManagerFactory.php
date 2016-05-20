@@ -1,5 +1,5 @@
 <?php
-namespace PhpDependencyManager;
+namespace PhpDependencyManager\DataManager;
 use Exception;
 use Neoxygen\NeoClient\ClientBuilder;
 
