@@ -6,10 +6,6 @@ use PhpDependencyManager\StringFilter\StringFilter;
 
 class ComposerJsonParser
 {
-    public function __construct(){
-
-    }
-
     /**
      * @param $fileToParse
      * @return ComponentDTO
@@ -20,10 +16,10 @@ class ComposerJsonParser
         try{
             $json = json_decode(file_get_contents($fileToParse), true);
             $componentDTO = new ComponentDTO();
-            $componentDTO->setName(StringFilter::unifyObjectName($json['name']));
+            $componentDTO->setName($json['name']);
             if (array_key_exists("psr-4", $json['autoload'])) {
                 $componentDTO->setNamespaces(array_keys($json['autoload']['psr-4']));
-            } else  if (array_key_exists("psr-0", $json['autoload'])) {
+            } else if (array_key_exists("psr-0", $json['autoload'])) {
                 $componentDTO->setNamespaces(array_keys($json['autoload']['psr-0']));
             }
             $componentDTO->setRequires($json['require']);

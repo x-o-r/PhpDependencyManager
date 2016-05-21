@@ -1,11 +1,16 @@
 <?php
 
 namespace PhpDependencyManager\DTO;
+use PhpDependencyManager\StringFilter\StringFilter;
 
 class ClassDTO implements ObjectDTOInterface
 {
-    private $className, $namespace, $extend;
-    private $interfaces, $injectedDependencies, $classesInstances = array();
+    private $className = null;
+    private $namespace = null;
+    private $extend = null;
+    private $interfaces = array();
+    private $injectedDependencies = array();
+    private $classesInstances = array();
 
     /**
      * @return mixed
@@ -20,7 +25,7 @@ class ClassDTO implements ObjectDTOInterface
      */
     public function setName($className)
     {
-        $this->className = $className;
+        $this->className = StringFilter::removeChars($className, StringFilter::INVALID_SYMS);
     }
 
     /**

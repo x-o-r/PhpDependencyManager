@@ -7,7 +7,7 @@ use PhpParser\NodeVisitorAbstract;
 
 class ClassVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $classDTO;
+    private $classDTO = null;
     private $injectedDependencies = array();
 
     public function __construct(ClassDTO $classDTO)

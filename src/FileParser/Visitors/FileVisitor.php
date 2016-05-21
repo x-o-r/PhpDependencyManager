@@ -10,8 +10,8 @@ use PhpParser\NodeTraverser;
 
 class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $phpObjectDTOCollection = array();
     private $namespace = null;
+    private $phpObjectDTOCollection = array();
 
     public function leaveNode(Node $node)
     {

@@ -7,8 +7,8 @@ use PhpParser\ParserFactory;
 
 class PhpParser
 {
-    private $parser;
-    private $traverser;
+    private $parser = null;
+    private $traverser = null;
 
     public function __construct(){
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
