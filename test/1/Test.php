@@ -10,6 +10,7 @@ class Test extends TestAbstract// implements TestIface
     }
 
     public function abstractMethod() {
+        new Toto();
         return;
     }
 }

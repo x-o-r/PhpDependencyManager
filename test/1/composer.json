@@ -1,0 +1,14 @@
+{
+    "name": "test/test",
+    "minimum-stability": "dev",
+	"autoload": {
+       	"psr-4": {
+			"TestNamespace\\": "./"
+		}
+  	},
+    "require": {
+        "neoxygen/neoclient": "^3.3",
+        "nikic/php-parser": "^2.1",
+        "phpmetrics/phpmetrics": "^1.10"
+    }
+}

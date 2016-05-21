@@ -1,11 +1,13 @@
 <?php
 
 namespace PhpDependencyManager\DTO;
+use PhpDependencyManager\StringFilter\StringFilter;
 
 class ComponentDTO implements ObjectDTOInterface
 {
     private $name = null;
-    private $namespaces, $requires = array();
+    private $namespaces = array();
+    private $requires = array();
 
     /**
      * @return null
@@ -20,7 +22,7 @@ class ComponentDTO implements ObjectDTOInterface
      */
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = StringFilter::unifyObjectName($name);
     }
 
     /**
@@ -32,11 +34,13 @@ class ComponentDTO implements ObjectDTOInterface
     }
 
     /**
-     * @param mixed $namespaces
+     * @param array $namespaces
      */
-    public function setNamespaces($namespaces)
+    public function setNamespaces(array $namespaces)
     {
-        $this->namespaces = $namespaces;
+        foreach($namespaces as $namespace){
+            array_push($this->namespaces, rtrim(StringFilter::unifyObjectName($namespace), '_'));
+        }
     }
 
     /**

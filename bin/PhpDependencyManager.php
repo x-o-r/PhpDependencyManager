@@ -20,15 +20,14 @@ if (!empty($argv[2])){
     }
 }
 
-//var_dump($dependencyExtractor->getObjectDTOArray());
-//var_dump($dependencyExtractor->getComponentsDTOArray());
-//exit;
-
 try
 {
     $dataManager = DataManagerFactory::getInstance();
     $dataManager->dropSchema();
     $dataManager->createSchema($dependencyExtractor->getObjectDTOArray(), $dependencyExtractor->getComponentsDTOArray());
+//    var_dump($dataManager->getQuery());exit;
+    file_put_contents(__DIR__. '/query.log', $dataManager->getQuery());
+    $dataManager->sendQuery();
 } catch (Exception $e)
 {
     echo "Database connection failed with following exceptions : \n$e";

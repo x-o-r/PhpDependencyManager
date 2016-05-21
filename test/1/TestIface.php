@@ -1,6 +1,6 @@
 <?php
 
-namespace TestNamespace;
+namespace TestNamespace\TestInterface;
 
 interface TestUpperIface
 {

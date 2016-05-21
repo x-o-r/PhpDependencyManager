@@ -22,6 +22,6 @@ class StringFilter
      */
     public static function unifyObjectName($objectName)
     {
-        return preg_replace('/[\/\\\\]/', '_', str_replace('-','', self::removeChars($objectName, self::INVALID_SYMS)));
+        return preg_replace('/[\/\\\\]/', '_', str_replace('-','', $objectName));
     }
 }

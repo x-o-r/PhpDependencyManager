@@ -1,10 +1,13 @@
 <?php
 
 namespace PhpDependencyManager\DTO;
+use PhpDependencyManager\StringFilter\StringFilter;
 
 class InterfaceDTO implements ObjectDTOInterface
 {
-    private $interfaceName, $namespace, $extend;
+    private $interfaceName = null;
+    private $namespace = null;
+    private $extend = null;
     private $injectedDependencies = array();
 
     /**
@@ -20,7 +23,7 @@ class InterfaceDTO implements ObjectDTOInterface
      */
     public function setName($interfaceName)
     {
-        $this->interfaceName = $interfaceName;
+        $this->interfaceName = StringFilter::removeChars($interfaceName, StringFilter::INVALID_SYMS);
     }
 
     /**
