@@ -1,15 +1,13 @@
 <?php
 
-namespace TestNamespace\SubNamespace;
+namespace TestNamespace;
 
 
-class Test2 extends TestAbstract// implements TestIface
+class Test2
 {
-    public function test(TestIface $class) {
-        return new Testname();
-    }
-
-    public function abstractMethod() {
-        return;
+    public function __construct()
+    {
+        new Test3();
+        new \TestNamespace\SubNamespace\Test2();
     }
 }

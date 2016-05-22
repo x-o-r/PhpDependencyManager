@@ -27,7 +27,7 @@ class DependencyExtractor
             {
                 foreach($parser->parse($file) as $object)
                 {
-                    $this->objectDTOArray[$object->getName() . ":" . $object->getNamespace()] = $object;
+                    $this->objectDTOArray[$object->getNamespace() . '\\' . $object->getName()] = $object;
                 }
 
 //                $this->$objectDTOArray[$parser->parse($file)] = basename($file);

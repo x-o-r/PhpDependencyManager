@@ -1,16 +1,51 @@
 <?php
 
 namespace PhpDependencyManager\DTO;
-use PhpDependencyManager\StringFilter\StringFilter;
 
 class ClassDTO implements ObjectDTOInterface
 {
     private $className = null;
     private $namespace = null;
+    private $rootNamespace = null;
+
     private $extend = null;
     private $interfaces = array();
     private $injectedDependencies = array();
     private $classesInstances = array();
+    private $uses = array();
+    private $aliases = array();
+
+    /**
+     * @return array
+     */
+    public function getUses()
+    {
+        return $this->uses;
+    }
+
+    /**
+     * @param array $uses
+     */
+    public function setUses($uses)
+    {
+        $this->uses = $uses;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAliases()
+    {
+        return $this->aliases;
+    }
+
+    /**
+     * @param array $aliases
+     */
+    public function setAliases($aliases)
+    {
+        $this->aliases = $aliases;
+    }
 
     /**
      * @return mixed
@@ -25,7 +60,8 @@ class ClassDTO implements ObjectDTOInterface
      */
     public function setName($className)
     {
-        $this->className = StringFilter::removeChars($className, StringFilter::INVALID_SYMS);
+//        $this->className = $className, StringFilter::INVALID_SYMS;
+        $this->className = $className;
     }
 
     /**
@@ -106,5 +142,21 @@ class ClassDTO implements ObjectDTOInterface
     public function setClassesInstances($classesInstances)
     {
         $this->classesInstances = $classesInstances;
+    }
+
+    /**
+     * @return null
+     */
+    public function getRootNamespace()
+    {
+        return $this->rootNamespace;
+    }
+
+    /**
+     * @param null $rootNamespace
+     */
+    public function setRootNamespace($rootNamespace)
+    {
+        $this->rootNamespace = $rootNamespace;
     }
 }

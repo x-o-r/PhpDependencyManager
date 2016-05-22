@@ -1,14 +1,49 @@
 <?php
 
 namespace PhpDependencyManager\DTO;
-use PhpDependencyManager\StringFilter\StringFilter;
 
 class InterfaceDTO implements ObjectDTOInterface
 {
     private $interfaceName = null;
     private $namespace = null;
+    private $rootNamespace = null;
+
     private $extend = null;
     private $injectedDependencies = array();
+    private $uses = array();
+    private $aliases = array();
+
+    /**
+     * @return array
+     */
+    public function getUses()
+    {
+        return $this->uses;
+    }
+
+    /**
+     * @param array $uses
+     */
+    public function setUses($uses)
+    {
+        $this->uses = $uses;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAliases()
+    {
+        return $this->aliases;
+    }
+
+    /**
+     * @param array $aliases
+     */
+    public function setAliases($aliases)
+    {
+        $this->aliases = $aliases;
+    }
 
     /**
      * @return mixed
@@ -23,7 +58,8 @@ class InterfaceDTO implements ObjectDTOInterface
      */
     public function setName($interfaceName)
     {
-        $this->interfaceName = StringFilter::removeChars($interfaceName, StringFilter::INVALID_SYMS);
+//        $this->interfaceName = StringFilter::removeChars($interfaceName, StringFilter::INVALID_SYMS);
+        $this->interfaceName = $interfaceName;
     }
 
     /**
@@ -74,5 +110,19 @@ class InterfaceDTO implements ObjectDTOInterface
         $this->injectedDependencies = $injectedDependencies;
     }
 
+    /**
+     * @return null
+     */
+    public function getRootNamespace()
+    {
+        return $this->rootNamespace;
+    }
 
+    /**
+     * @param null $rootNamespace
+     */
+    public function setRootNamespace($rootNamespace)
+    {
+        $this->rootNamespace = $rootNamespace;
+    }
 }

@@ -1,16 +1,18 @@
 <?php
 
 namespace TestNamespace;
+use TestNamespace\SubNamespace\Test2;
+use OtherNamespace;
+require __DIR__ . '/../vendor/autoload.php';
 
-
-class Test extends TestAbstract// implements TestIface
+class Test extends TestAbstract implements TestIface
 {
     public function test(TestIface $class) {
         return new Test2();
     }
 
     public function abstractMethod() {
-        new Toto();
+        new OtherNamespace\Test3();
         return;
     }
 }
