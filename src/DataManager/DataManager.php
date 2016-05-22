@@ -10,9 +10,11 @@ class DataManager
 {
     private $client = null;
     private $query = null;
+    private $classNameToID = array();
     private $rootNamespaceCollection = array(); // Key : 'root namespace', value : 'component name'
     private $componentNamespaceCollection = array();
     private $fullComponentCollection = array();
+    private $namespaceCollection = array();
 
     private $realComponentQueryCollection = array();
     private $nodeQueryCollection = array();
@@ -73,22 +75,59 @@ class DataManager
 
             foreach($namespaceParts as $part)
             {
+                array_push($this->namespaceCollection, $part);
                 // Create node
                 $this->createNode($part, "namespace");//, array("full_namespace" => $namespace));
                 if (is_null($previousPart)) { // Create component root namespace relation
                     array_push($this->rootNamespaceCollection, $part);
                     $previousPart = $part;
                 } else { // If previous namespace node exists, create relation and save previous node
-                    $this->createRelation($part, "IS_IN", $previousPart);
+                    $this->createRelation($part, "IS_IN_NS", $previousPart);
                     $previousPart = $part;
                 }
             }
         }
     }
 
+    public function createNodeFromUndiscoveredObject($unknownObject, $object, $objectKey, $relationType, $reverseRelation = null){
+        if ($reverseRelation === null){
+            $reverseRelation = false;
+        } else {
+            $reverseRelation = false;
+        }
+        // Could be optimised with pattern search in flatten $this->classNameToID keys
+        if (key_exists($unknownObject, $this->classNameToID) && key_exists($objectKey, $this->classNameToID[$unknownObject])) {
+            $objInstanceFromKnownObject = $this->classNameToID[$unknownObject][$objectKey];
+            $objInstanceFromKnownObjectNamespace = $objInstanceFromKnownObject->getNamespace();
+            if (empty($objInstanceFromKnownObjectNamespace)) {
+                $objInstanceFromKnownObjectNamespace = "no_namespace";
+            }
+            $objectType = null;
+            if ($object instanceof ClassDTO) {
+                $objectType = "class";
+            }
+            if ($object instanceof InterfaceDTO) {
+                $objectType = "interface";
+            }
+            $this->createNode($objInstanceFromKnownObject->getName(), $objectType, array("namespace" => $objInstanceFromKnownObjectNamespace));
+            if ($reverseRelation === false){
+                $this->createRelation($object->getName(), $relationType, $objInstanceFromKnownObject->getName());
+            } else{
+                $this->createRelation($objInstanceFromKnownObject->getName(), $relationType, $object->getName());
+            }
+
+        } else {
+            $this->createNode($unknownObject, "undiscovered_class", array("namespace" => "undiscovered_namespace"));
+            if ($reverseRelation === false){
+                $this->createRelation($object->getName(), $relationType, $unknownObject);
+            } else{
+                $this->createRelation($unknownObject, $relationType, $object->getName());
+            }
+        }
+    }
+
     public function createSchema(array $objectDTOCollection, array $componentDTOCollection = null) {
 
-        $classNameToID = array();
         // First pass on $objectDTOCollection to build a hastable with key:'non unique class name' value:'unique class         '
         foreach (array_keys($objectDTOCollection) as $objectKey) {
             $classNameToID[$this->getDTONameFromKey($objectKey)][$objectKey]=$objectDTOCollection[$objectKey];
@@ -108,41 +147,61 @@ class DataManager
         // Classes and interfaces
         foreach (array_keys($objectDTOCollection) as $objectKey) {
 
-            $obj = $objectDTOCollection[$objectKey];
+            $object = $objectDTOCollection[$objectKey];
+            $namespace = $object->getNamespace();
 
-            $namespace = $obj->getNamespace();
             if (empty($namespace)){
                 $namespace = "no_namespace";
             } else{
                 $this->createNamespace($namespace);
             }
 
-            if (!empty($obj->getExtend())) { // Extend
-
+            if ($object instanceof InterfaceDTO) {
+                $this->createNode($object->getName(), "interface", array("namespace" => $namespace));
             }
 
-            if ($obj instanceof ClassDTO) {
-                $this->createNode($obj->getName(), "class", array("namespace" => $namespace));
-                $classInstances = $obj->getClassesInstances();
-                if (!empty($classInstances) && count($classInstances)) { // Compose
+            if ($object instanceof ClassDTO) {
+                $this->createNode($object->getName(), "class", array("namespace" => $namespace));
+                $classInstances = $object->getClassesInstances();
+                if (is_array($classInstances) && count($classInstances)) { // Compose
                     foreach ($classInstances as $objInstance) {
-                        if (key_exists($objInstance, $classNameToID) && key_exists($objectKey, $classNameToID[$objInstance])) {
-                            $objInstanceFromKnownObject = $classNameToID[$objInstance][$objectKey];
-                            $objInstanceFromKnownObjectNamespace = $objInstanceFromKnownObject->getNamespace();
-                            if (empty($objInstanceFromKnownObjectNamespace)) {
-                                $objInstanceFromKnownObjectNamespace = "no_namespace";
-                            }
-                            $this->createNode($objInstanceFromKnownObject->getName(), "class", array("namespace" => $objInstanceFromKnownObjectNamespace));
-                            $this->createRelation($obj->getName(), "COMPOSE", $objInstanceFromKnownObject->getName());
-                        } else {
-                            $this->createNode($objInstance, "undiscovered_class", array("namespace" => "undiscovered_namespace"));
-                            $this->createRelation($obj->getName(), "COMPOSE", $objInstance);
-                        }
+                        $this->createNodeFromUndiscoveredObject($objInstance, $object, $objectKey, "COMPOSE");
+//                        if (key_exists($objInstance, $classNameToID) && key_exists($objectKey, $classNameToID[$objInstance])) {
+//                            $objInstanceFromKnownObject = $classNameToID[$objInstance][$objectKey];
+//                            $objInstanceFromKnownObjectNamespace = $objInstanceFromKnownObject->getNamespace();
+//                            if (empty($objInstanceFromKnownObjectNamespace)) {
+//                                $objInstanceFromKnownObjectNamespace = "no_namespace";
+//                            }
+//                            $this->createNode($objInstanceFromKnownObject->getName(), "class", array("namespace" => $objInstanceFromKnownObjectNamespace));
+//                            $this->createRelation($obj->getName(), "COMPOSE", $objInstanceFromKnownObject->getName());
+//                        } else {
+//                            $this->createNode($objInstance, "undiscovered_class", array("namespace" => "undiscovered_namespace"));
+//                            $this->createRelation($obj->getName(), "COMPOSE", $objInstance);
+//                        }
+                    }
+                }
+                if (is_array($object->getInjectedDependencies()) && count($object->getInjectedDependencies())) { // Aggregate
+                    foreach($object->getInjectedDependencies() as $injectedDependencies) {
+                        $this->createNodeFromUndiscoveredObject($injectedDependencies, $object, $objectKey, "AGGREGATE", true);
+                    }
+                }
+
+                if (is_array($object->getInterfaces()) && count($object->getInterfaces())) { // Implement
+                    foreach($object->getInterfaces() as $interface){
+                        $this->createNodeFromUndiscoveredObject($interface, $object, $objectKey, "IMPLEMENT");
                     }
                 }
             }
-            if ($obj instanceof InterfaceDTO) {
-                $this->createNode($obj->getName(), "interface", array("namespace" => $namespace));
+
+            if (!empty($object->getExtend())) { // Extend
+                $this->createNodeFromUndiscoveredObject($object->getExtend(), $object, $objectKey, "EXTEND");
+            }
+
+            // Object > namespace
+            $namespaceParts = explode('_', $namespace);
+            $terminalNamespace = end($namespaceParts);
+            if(in_array($terminalNamespace, $this->namespaceCollection)){
+                $this->createRelation($object->getName(), "HAS_NS", $terminalNamespace);
             }
         }
 
@@ -157,7 +216,7 @@ class DataManager
             if (preg_match('/'.$rootNamespace.'/', $flattenComponentNamespaces)) {
                 $componentName = $this->componentNamespaceCollection[$rootNamespace];
                 $this->createNode($componentName, "component");
-                $this->createRelation($rootNamespace, "DECLARED_IN", $componentName);
+                $this->createRelation($rootNamespace, "DECLARED_IN_PKG", $componentName);
             }
         }
 
