@@ -26,8 +26,8 @@ class PhpParser
             $visitor = new Visitors\FileVisitor();
             $this->traverser->addVisitor($visitor);
             $stmts = $this->parser->parse(file_get_contents($fileToParse));
-//            echo($fileToParse . "\n");
-//            var_dump($stmts);
+            echo($fileToParse . "\n");
+            var_dump($stmts);
             $this->traverser->traverse($stmts);
             $this->traverser->removeVisitor($visitor);
             $DTOCollection = $visitor->getDTO();

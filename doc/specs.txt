@@ -1,0 +1,35 @@
+- Voir trait 
+
+- Un fichier sans classe ni interface: -> PhpFileDTO, peut avoir des injections de dépendance (uniquement possible par include et require) et créer des objets (AGGREGATE + COMPOSE)
+
+- Une fichier sans namespace mais avec classe ou interface : ->ClassDTO ou InterfaceDTO mais sera labelisé class_without_namespace ou interface_without_namespace
+
+=> Dans l'immédiat les fichiers sans classe ou interface ou bien sans namespace ne sont pas traités !
+
+- Analyse des new, ex. new ClassName() :
+
+-> Par rapport au nom de la classe instanciée : la classe existe-t-elle dans la liste des classes découvertes ?
+	
+	Pour le déterminer : 
+	1 - Classname contient un namespace, existe-t-il dans la liste des classes découvertes ?
+		Oui => goto 4
+		Non => goto 2 
+	2 - Est ce que currentNamespace\Classname existe dans la liste des classes découvertes ? 
+		Oui => goto 4
+		Non => goto 3 
+	3 - Analyse de la liste des use : le premier use qui correspond est la classe qui est utilisée ou bien le premier alias qui correspond : classe trouvée ?
+		Oui -> goto 4
+		Non -> goto 5	
+	4	- FullNamespace\ClassName existe  dans  la liste des classes crées ?
+		Oui => création de la relation
+		Non => création de l'objet, ajout dans la table des objets crées (FullNamespace\ClassName), création de la relation
+		goto fin
+	5 - un ClassDTO est crée avec le label undiscovered_class et l'attribut from_namespace = namespace de la clase qui effectue l'instanciation
+
+	Structures de données
+	- Liste des classes découvertes : array ( FullNamespace\ClassName1, FullNamespace\ClassName2, ...) constuit à l'appel de CreateSchema sur objectsDTOCollection
+	- Liste des objets crées : ( FullNamespace\ClassName1, FullNamespace\ClassName2, ...) : construit en deux passes : 
+		-> Une 1ère passe sur objectsDTOCollection pour la création des entités classes et d'interfaces et des entités namespace = relation
+		-> Une 2ème passe sur objectsDTOCollection pour la création entités et relation suivantes : compose, aggregate, extend, implement avec l'algo "Analyse des new" 
+	
+	

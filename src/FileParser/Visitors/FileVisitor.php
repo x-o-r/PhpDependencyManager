@@ -28,7 +28,7 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
                 array_push($use, $useKey);
                 for ($i=1; $i<$partsCount; $i++){
                     $useKey .= '\\' . $node->name->parts[$i];
-                    array_push($use, $useKey);
+                    $use[$useKey];
                 }
                 $this->uses[$useKey] = $use;
 
