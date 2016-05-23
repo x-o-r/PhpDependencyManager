@@ -13,8 +13,7 @@ if (empty($argv[1])) {
     exit;
 }
 
-try
-{
+try {
     $dependencyExtractor = new DependencyExtractor();
 
     echo "+ Recusivly parse PHP files of " . $argv[1] . "\n";
@@ -29,7 +28,7 @@ try
 
     $dataManager = DataManagerFactory::getInstance();
 
-    echo "+ Drop previsous schema \n";
+    echo "+ Drop previous schema \n";
     $dataManager->dropSchema();
 
     echo "+ Create schema (see bin/query.log)\n";
@@ -39,10 +38,11 @@ try
     echo "+ Sending query \n";
     $dataManager->sendQuery();
 } catch (ComposerJsonParserException $e){
-    echo ($e);
+    echo ($e . "\n");
 } catch (DataManagerException$e)
 {
     echo("Database connection failed with following exceptions : \n$e");
 } catch (Exception $e)
 {
+    echo ($e . "\n");
 }

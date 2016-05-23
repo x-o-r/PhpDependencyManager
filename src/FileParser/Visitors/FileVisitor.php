@@ -18,31 +18,22 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
 
     public function leaveNode(Node $node)
     {
-
         if ($node instanceof Node\Stmt\Useuse) {
-
-            $partsCount = count($node->name->parts);
-            if (is_array($node->name->parts) && $partsCount) {
-                $useKey = $node->name->parts[0];
-                $use = array();
-                array_push($use, $useKey);
-                for ($i=1; $i<$partsCount; $i++){
-                    $useKey .= '\\' . $node->name->parts[$i];
-                    $use[$useKey];
-                }
-                $this->uses[$useKey] = $use;
-
-                $alias = $node->alias;
-                if (count($use) && !empty($alias) && !empty($useKey)){
-                    if ($alias != end($use)){
-                        $this->aliases[$alias] = $useKey;
+            if (is_array($node->name->parts) && count($node->name->parts)) {
+                $classTarget = end($node->name->parts);
+                if ($classTarget === $node->alias) {
+                    if(!array_key_exists($classTarget, $this->uses)) {
+                        $this->uses[$classTarget] = implode('\\', $node->name->parts);
+                    }
+                } else {
+                    if(!array_key_exists($node->alias, $this->uses)) {
+                        $this->uses[$classTarget] = implode('\\', $node->name->parts);
                     }
                 }
             }
         }
 
-        if ($node instanceof Node\Stmt\Namespace_)
-        {
+        if ($node instanceof Node\Stmt\Namespace_) {
             $partsCount = count($node->name->parts);
             if (is_array($node->name->parts) && $partsCount) {
                 $namespace = $node->name->parts[0];

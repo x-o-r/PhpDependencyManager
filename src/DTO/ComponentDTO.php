@@ -5,8 +5,32 @@ namespace PhpDependencyManager\DTO;
 class ComponentDTO implements ObjectDTOInterface
 {
     private $name = null;
+    private $mainName = null;
+    private $subName = null;
     private $namespaces = array();
     private $requires = array();
+
+    /**
+     * @return null
+     */
+    public function getMainName()
+    {
+        if (empty($this->mainName)){
+            return $this->getName();
+        }
+        return $this->mainName;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSubName()
+    {
+        if (empty($this->subName)){
+            return $this->getName();
+        }
+        return $this->subName;
+    }
 
     /**
      * @return null
@@ -21,8 +45,12 @@ class ComponentDTO implements ObjectDTOInterface
      */
     public function setName($name)
     {
-//        $this->name = StringFilter::unifyObjectName($name);
         $this->name = $name;
+        $parts = explode('/', $name);
+        if (count($parts)>=2){
+            $this->mainName = $parts[0];
+            $this->subName = $parts[1];
+        }
     }
 
     /**
@@ -40,7 +68,7 @@ class ComponentDTO implements ObjectDTOInterface
     {
         foreach($namespaces as $namespace){
 //            array_push($this->namespaces, rtrim(StringFilter::unifyObjectName($namespace), '_'));
-            array_push($this->namespaces, rtrim($namespace), '\\');
+            array_push($this->namespaces, rtrim($namespace, '\\'));
         }
     }
 

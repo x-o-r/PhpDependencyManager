@@ -1,7 +1,13 @@
 {
-    "name": "test/test",
+    "name": "test/test1",
+    "authors": [
+        {
+            "name": "xOrOx",
+            "email": "vincent.ravier@free.fr"
+        }
+    ],
     "require": {
-        "phpmetrics/phpmetrics": "^1.10"
+        "symfony/filesystem": "^3.0"
     },
     "autoload": {
         "psr-4": {

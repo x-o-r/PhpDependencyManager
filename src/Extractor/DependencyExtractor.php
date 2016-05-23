@@ -22,15 +22,13 @@ class DependencyExtractor
         $finder = new Finder();
         foreach ($finder->find($path) as $file)
         {
+            // @TODO : Check syntax first
             $parser = new FileParser\PhpParser();
-            try
-            {
+            try {
                 foreach($parser->parse($file) as $object)
                 {
                     $this->objectDTOArray[$object->getNamespace() . '\\' . $object->getName()] = $object;
                 }
-
-//                $this->$objectDTOArray[$parser->parse($file)] = basename($file);
             } catch (Exception $e)
             {
                 // @TODO : log
@@ -44,10 +42,10 @@ class DependencyExtractor
         $root_component = $parser->parse($composerJsonFile);
         array_push($this->componentsDTOArray, $root_component);
 
-        $finder = new Finder('json');
+        $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
         foreach ($finder->find(dirname($composerJsonFile)) as $file)
         {
-            if (preg_match('/composer\.json/', $file)) { // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
+            if (preg_match('/composer\.json/', $file) && basename($file) !== basename($composerJsonFile)) {
                 array_push($this->componentsDTOArray, $parser->parse($file));
             }
         }

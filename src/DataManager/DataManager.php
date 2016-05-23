@@ -14,10 +14,11 @@ class DataManager
     private $rootNamespaceCollection = array();
     private $componentNamespaceCollection = array();
     private $fullComponentCollection = array();
-    private $namespaceCollection = array();
     private $realComponentQueryCollection = array();
     private $nodeQueryCollection = array();
     private $relationQueryCollection = array();
+    private $undiscoveredObject = array();
+    private $createdNamespace = array();
 
     public function __construct($neo4jClient)
     {
@@ -36,9 +37,9 @@ class DataManager
     }
 
     public function dumpObjectAndRelation(){
-        return  implode("\n", $this->nodeQueryCollection) . "\n" .
-                implode("\n", $this->realComponentQueryCollection) . "\n" .
-                implode("\n", $this->relationQueryCollection);
+        return  implode("\n", array_values($this->nodeQueryCollection)) . "\n" .
+                implode("\n", array_values($this->realComponentQueryCollection)) . "\n" .
+                implode("\n", array_values($this->relationQueryCollection));
     }
 
     public function dropSchema() {
@@ -46,172 +47,148 @@ class DataManager
     }
 
     public function createNode($nodeName, $nodeType, $attributes = null) {
-        $query = "CREATE (`" . $nodeName . "`:" . $nodeType . "{name:'" . $nodeName . "',";
+        $query = "CREATE (`" . $nodeName . "`:" . $nodeType;
         if (is_array($attributes) && count($attributes)){
+            $query .= "{";
             foreach ($attributes as $key => $value){
-                $query .= str_replace('"', '', $key) . ":'" . str_replace('"', '', $value) . "',";
+                $query .= str_replace('"', '', $key) . ":'`" . str_replace('"', '', str_replace('\\', '\\\\', $value)) . "`',";
             }
+            $query = substr($query, 0, -1); // Remove last ','
+            $query .= '}';
         }
-        $query = substr($query, 0, -1);
-        $query .= '})';
+        $query .= ')';
 
         if ($nodeType === "class" || $nodeType === "interface" || $nodeType === "namespace" || $nodeType === "undiscovered_class"){
-            array_push($this->nodeQueryCollection, $query);
+            $this->nodeQueryCollection[$nodeName] = $query;
         }
         if ($nodeType === "component"){
-            array_push($this->realComponentQueryCollection, $query);
+            $this->realComponentQueryCollection[$nodeName] = $query;
         }
     }
 
     public function createRelation($fromNode, $relationName, $toNode) {
-        array_push($this->relationQueryCollection, "CREATE (" . $fromNode . ")-[:" . $relationName . "{type:'" . $relationName . "'}]->(" . $toNode . ")");
+        $this->relationQueryCollection[$fromNode.$relationName.$toNode] = "CREATE (`" . $fromNode . "`)-[:" . $relationName . "{type:'" . $relationName . "'}]->(`" . $toNode . "`)";
     }
 
-    private function getDTONameFromKey($key) {
-        $className = explode(':', $key);
-        return array_shift($className);
-    }
-
-    public function createNamespace($namespace){
-        if (!empty($namespace)){
-            $namespaceParts = null;
-            $previousPart = null;
-            $namespaceParts = explode('\\', $namespace);
-
-            foreach($namespaceParts as $part)
-            {
-                array_push($this->namespaceCollection, $part);
-                // Create node
-                $this->createNode($part, "namespace");
-                if (is_null($previousPart)) { // Create component root namespace relation
-                    array_push($this->rootNamespaceCollection, $part);
-                    $previousPart = $part;
-                } else { // If previous namespace node exists, create relation and save previous node
-                    $this->createRelation($part, "IS_IN_NS", $previousPart);
-                    $previousPart = $part;
+    public function createNamespace($namespace) {
+        if (!empty($namespace)) {
+            if(!in_array($namespace, $this->createdNamespace)) {
+                $namespaceParts = explode('\\', $namespace);
+                $fullNamespace = null;
+                $previousNamespace = null;
+                foreach ($namespaceParts as $part) {
+                    if(empty($fullNamespace)){
+                        $fullNamespace = $part;
+                        $this->createNode($fullNamespace, "namespace", array('name' => $part));
+                    } else{
+                        $nodeName = $fullNamespace . '\\' . $part;
+                        $this->createNode($nodeName, "namespace", array('name' => $part));
+                        $this->createRelation($nodeName, "IS_IN_NS", $fullNamespace);
+                        $fullNamespace = $nodeName;
+                    }
+                    array_push($this->createdNamespace, $fullNamespace);
                 }
             }
         }
     }
 
-    public function createUndiscoveredObject($unknownObjectName, $object, $objectKey, $relationType, $reverseRelation = null){
+    public function createUndiscoveredObject($objectName, $contextObject, $relationType, $reverseRelation = null) {
         if ($reverseRelation === null) {
             $reverseRelation = false;
         } else {
             $reverseRelation = true;
         }
 
-        if (in_array($unknownObjectName, $this->existingObjects)) {
-//            if (array_key_exists($unknownObjectName, $this->classNameToID[$unknownObjectName]))
-//            $existingObject = $this->classNameToID[$unknownObjectName];
-//            foreach(array_keys($existingObject) as $id){
-//
-//            }
-//            // Retrieve unique object : unknown object has the same namespace than $object or namespace is in $unknownObjectName string
-//            $uniqueObjectKey = $unknownObjectName . ":" . $object->getNamespace();
-//
-//            var_dump($object, $uniqueObjectKey); exit;
-//
-//            $objInstanceFromKnownObject = $this->classNameToID[$unknownObjectName][$objectKey];
-//            $objInstanceFromKnownObjectNamespace = $objInstanceFromKnownObject->getNamespace();
-//            if (empty($objInstanceFromKnownObjectNamespace)) {
-//                $objInstanceFromKnownObjectNamespace = "no_namespace";
-//            }
-//            $objectType = null;
-//            if ($object instanceof ClassDTO) {
-//                $objectType = "class";
-//            }
-//            if ($object instanceof InterfaceDTO) {
-//                $objectType = "interface";
-//            }
-//            $this->createNode($objInstanceFromKnownObject->getName(), $objectType, array("namespace" => $objInstanceFromKnownObjectNamespace));
-//            if ($reverseRelation === false){
-//                $this->createRelation($object->getName(), $relationType, $objInstanceFromKnownObject->getName());
-//            } else{
-//                $this->createRelation($objInstanceFromKnownObject->getName(), $relationType, $object->getName());
-//            }
-            if ($reverseRelation === false){
-                $this->createRelation($object->getName(), $relationType, $unknownObjectName);
-            } else{
-                $this->createRelation($unknownObjectName, $relationType, $object->getName());
+        // Check if class name has a namespace
+        $instanceContainsNamespace = preg_match('/\\\\/', $objectName);
+
+        if ($instanceContainsNamespace) { // Class name contains namespace and exists in $this->existingObjects
+            $objectName = ltrim('\\', $objectName);
+            if (array_key_exists($objectName, $this->existingObjects)) {
+                $this->createRelation( $this->existingObjects[$objectName]->getname(), $relationType, $objectName);
+                return;
             }
-        } else {
-            $this->createNode($unknownObjectName, "undiscovered_class", array("namespace" => "undiscovered_namespace"));
-            if ($reverseRelation === false){
-                $this->createRelation($object->getName(), $relationType, $unknownObjectName);
-            } else{
-                $this->createRelation($unknownObjectName, $relationType, $object->getName());
+        } else if (array_key_exists($contextObject->getNamespace() . '\\' . $objectName, $this->existingObjects)) { // Class name exists in current object's namespace
+            $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $contextObject->getNamespace() . '\\' . $objectName);
+            return;
+        } else {  // Check uses and aliases
+            $uses = $contextObject->getUses();
+            if (array_key_exists($objectName, $uses)) {
+                if (array_key_exists($uses[$objectName], $this->existingObjects)) {
+                    var_dump($uses[$objectName]);
+                    $existingObject = $this->existingObjects[$uses[$objectName]];
+                    $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $existingObject->getNamespace() . '\\' . $existingObject->getName()); // Could be replaced by just $instance ?
+                    return;
+                }
             }
         }
+
+        // Finally, $instance was not discovered, create it has undiscovered class
+        // If $instance contains a namespace, add it to his attributes list
+        if (!in_array($objectName, $this->undiscoveredObject)) {
+            if ($instanceContainsNamespace) {
+                $parts = explode('\\', $objectName);
+                $namespace = $parts[0];
+                for ($i = 1; $i < count($parts) - 1; $i++) {
+                    $namespace .= $parts[$i];
+                }
+                $objectName = end($parts);
+                $this->createNode($objectName, "undiscovered_class", array('name' => $objectName, 'namespace' => $namespace));
+            } else {
+                $this->createNode($objectName, "undiscovered_class", array('name' => $objectName));
+            }
+            array_push($this->undiscoveredObject, $objectName);
+        }
+        $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $objectName);
     }
 
     public function createSchema(array $objectDTOCollection, array $componentDTOCollection = null) {
-//        foreach (array_keys($objectDTOCollection) as $objectKey) {
-//            $nonUniqueObjectName = $this->getDTONameFromKey($objectKey);
-//            if (!array_key_exists($nonUniqueObjectName, $this->classNameToID)){
-//                $this->classNameToID[$nonUniqueObjectName] = array();
-//            }
-//            array_push($this->classNameToID[$nonUniqueObjectName], array($objectKey => $objectDTOCollection[$objectKey]));
-//        }
-//        foreach (array_keys($objectDTOCollection) as $objectKey) {
-//            $object = $objectDTOCollection[$objectKey];
-//            $this->classNameToID[$object->getname() . ":" . $object->getNamespace()] = $object;
-//        }
-        var_dump($objectDTOCollection);exit;
+
         foreach (array_keys($objectDTOCollection) as $objectKey) {
+            $objectParts = explode('\\', $objectKey);
+            $objectKeyWithoutNamespace = end($objectParts);
             $object = $objectDTOCollection[$objectKey];
-            $objectName = $object->getName();
             $objectNamespace = $object->getNamespace();
+            if (empty($objectNamespace)){
+                continue;
+            }
             $this->existingObjects[$objectKey] = $object;
+            $this->rootNamespaceCollection[$object->getRootNamespace()] = null; // Only for using the unicity of a sorted map keys
 
             if ($object instanceof ClassDTO) {
-                $this->createNode($objectName, "class", array ('namespace' => $objectNamespace));
+                $this->createNode($objectKey, "class", array ('name' => $objectKeyWithoutNamespace, 'namespace' => $objectNamespace));
+
             }
             if ($object instanceof InterfaceDTO) {
-                $this->createNode($objectName, "interface", array ('namespace' => $objectNamespace));
+                $this->createNode($objectKey, "interface", array ('name' => $objectKeyWithoutNamespace, 'namespace' => $objectNamespace));
             }
             
             $this->createNamespace($objectNamespace);
+            $this->createRelation($objectKey, "HAS_NS", $objectNamespace);
         }
 
-        //@TODO : could be faster with use of preg_match on flattened array keys $this->existingObjects
         foreach ($this->existingObjects as $object) {
 
-            // Handle object instanciation
             if ($object instanceof ClassDTO) {
                 $classesInstances = $object->getClassesInstances();
-                foreach($classesInstances as $instance){
-                    // Check if class name has a namespace
-                    $instanceContainsNamespace = preg_match('\\', $instance);
-                    if($instanceContainsNamespace){ // Class name contains namespace and exists in $this->existingObjects
-                        $instance = ltrim('\\', $instance);
-                        if (array_key_exists($instance, $this->existingObjects)){
-                            $this->createRelation($object->getName(), "COMPOSE", $this->existingObjects[$instance]->getname());
-                            continue;
-                        }
-                    } else if (array_key_exists($object->getNamespace() . '\\' . $instance, $this->existingObjects)){ // Class name exists in current object's namespace
-                        $this->createRelation($object->getName(), "COMPOSE", $this->existingObjects[$object->getNamespace() . '\\' . $instance]->getname());
-                        continue;
-                    } else {  // Check uses and aliases
-                        foreach($object->getUses() as $use){
-
-                        }
-                    }
-                    // Finally, $instance was not discovered, create it has undiscovered class
-                    // If $instance contains a namespace, add it to his attributes list
-                    if ($instanceContainsNamespace){
-                        $parts = explode('\\', $instance);
-                        $namespace = $parts[0];
-                        for($i=1;$i<count($parts)-1;$i++){
-                            $namespace .= $parts[$i];
-                        }
-                        $instance = end($parts);
-                        $this->createNode($instance, "undiscovered_class", array('namespace' => $namespace));
-                    } else {
-                        $this->createNode($instance, "undiscovered_class");
-                    }
-                    $this->createRelation($object->getName(), "COMPOSE", $instance);
+                foreach($classesInstances as $instance) {
+                    $this->createUndiscoveredObject($instance, $object, "COMPOSE");
                 }
+
+                $interfacesImplemented = $object->getInterfaces();
+                foreach($interfacesImplemented as $interface) {
+                    $this->createUndiscoveredObject($interface, $object, "IMPLEMENT");
+                }
+
+                $injectedDependencies = $object->getInjectedDependencies();
+                foreach($injectedDependencies as $injectedDependency) {
+                    $this->createUndiscoveredObject($injectedDependency, $object, "AGGREGATE", true);
+                }
+            }
+
+            // Handle object extension
+            if (!empty($object->getExtend())) {
+                $this->createUndiscoveredObject($object->getExtend(), $object, "EXTEND");
             }
         }
 
@@ -228,69 +205,21 @@ class DataManager
             }
         }
 
-        // Classes and interfaces
-        foreach (array_keys($objectDTOCollection) as $objectKey) {
-
-            $object = $objectDTOCollection[$objectKey];
-            $namespace = $object->getNamespace();
-
-            if (empty($namespace)){
-                $namespace = "no_namespace";
-            } else{
-                $this->createNamespace($namespace);
-            }
-
-            if ($object instanceof InterfaceDTO) {
-                $this->createNode($object->getNamespace().'>'.$object->getName(), "interface", array("namespace" => $namespace));
-            }
-
-            if ($object instanceof ClassDTO) {
-                $this->createNode($object->getNamespace().'>'.$object->getName(), "class", array("namespace" => $namespace));
-                $classInstances = $object->getClassesInstances();
-                if (is_array($classInstances) && count($classInstances)) { // Compose
-                    foreach ($classInstances as $objInstance) {
-                        $this->createUndiscoveredObject($objInstance, $object, $objectKey, "COMPOSE");
-                    }
-                }
-                if (is_array($object->getInjectedDependencies()) && count($object->getInjectedDependencies())) { // Aggregate
-                    foreach($object->getInjectedDependencies() as $injectedDependencies) {
-                        $this->createUndiscoveredObject($injectedDependencies, $object, $objectKey, "AGGREGATE", true);
-                    }
-                }
-
-                if (is_array($object->getInterfaces()) && count($object->getInterfaces())) { // Implement
-                    foreach($object->getInterfaces() as $interface){
-                        $this->createUndiscoveredObject($interface, $object, $objectKey, "IMPLEMENT");
-                    }
-                }
-            }
-
-            if (!empty($object->getExtend())) { // Extend
-                $this->createUndiscoveredObject($object->getExtend(), $object, $objectKey, "EXTEND");
-            }
-
-            // Object > namespace
-            $namespaceParts = explode('_', $namespace);
-            $terminalNamespace = end($namespaceParts);
-            if(in_array($terminalNamespace, $this->namespaceCollection)){
-                $this->createRelation($object->getName(), "HAS_NS", $terminalNamespace);
-            }
-        }
-
-        if (!is_null($componentDTOCollection)) {
-            $flattenComponentNamespaces = implode(array_keys($this->componentNamespaceCollection));
-            foreach (array_unique($this->rootNamespaceCollection) as $rootNamespace) {
-                if (preg_match('/' . $rootNamespace . '/', $flattenComponentNamespaces)) {
+        if (!is_null($this->fullComponentCollection)) {
+            foreach (array_keys($this->rootNamespaceCollection) as $rootNamespace) {
+                if (array_key_exists($rootNamespace, $this->componentNamespaceCollection)) {
                     $componentName = $this->componentNamespaceCollection[$rootNamespace];
-                    $this->createNode($componentName, "component");
+                    $component = $this->fullComponentCollection[$componentName];
+                    $this->createNode($componentName, "component", array('name' => $component->getSubName()));
                     $this->createRelation($rootNamespace, "DECLARED_IN_PKG", $componentName);
                 }
             }
         }
 
-        $objects    = implode (' ', array_unique($this->nodeQueryCollection));
-        $components = implode (' ', array_unique($this->realComponentQueryCollection));
-        $relations  = implode (' ', array_unique($this->relationQueryCollection));
+        // Still usefull ?
+        $objects    = implode (' ', array_values($this->nodeQueryCollection));
+        $components = implode (' ', array_values($this->realComponentQueryCollection));
+        $relations  = implode (' ', array_values($this->relationQueryCollection));
 
         $this->query = $objects.$components.$relations;
     }

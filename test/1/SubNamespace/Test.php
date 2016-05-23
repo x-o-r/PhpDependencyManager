@@ -2,9 +2,12 @@
 
 namespace TestNamespace\SubNamespace;
 
+require __DIR__ . '/../vendor/autoload.php';
+
+
+use TestNamespace\Test2 as Test4;
 use TestNamespace\Test2;
-use TestNamespace\Test3;
-use OtherNamespace\Test3 as Test4;
+//use TestNamespace\SubNamespace\Test2;
 
 class Test
 {
@@ -14,3 +17,5 @@ class Test
         new Test4();
     }
 }
+
+new Test();
