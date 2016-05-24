@@ -31,16 +31,17 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
         }
 
         if ($node instanceof Node\Stmt\Namespace_) {
-            $partsCount = count($node->name->parts);
-            if (is_array($node->name->parts) && $partsCount) {
-                $namespace = $node->name->parts[0];
-                $this->rootNamespace = $namespace;
-                for ($i=1; $i<$partsCount; $i++){
+            if(!is_null($node->name) && !is_null($node->name->parts)&&is_array($node->name->parts)){
+                $partsCount = count($node->name->parts);
+                if (is_array($node->name->parts) && $partsCount) {
+                    $namespace = $node->name->parts[0];
+                    $this->rootNamespace = $namespace;
+                    for ($i=1; $i<$partsCount; $i++){
                         $namespace .= '\\' . $node->name->parts[$i];
+                    }
+                    $this->namespace = $namespace;
                 }
-
             }
-            $this->namespace = $namespace;
         }
 
         if ($node instanceof Node\Stmt\Interface_) {
@@ -48,8 +49,8 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
             $traverser = new NodeTraverser();
             $interfaceDTO->setName($node->name);
 
-            if (!empty($node->extends) && count($node->extends[0]->parts[0])) {
-                $interfaceDTO->setExtend($node->extends[0]->parts[0]);
+            if (!empty($node->extends) && count($node->extends[0]->parts)) {
+                $interfaceDTO->setExtend(implode('\\', $node->extends[0]->parts));
             }
 
             $visitor = new InterfaceVisitor($interfaceDTO);
@@ -66,12 +67,16 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
 
             $classDTO->setName($node->name);
 
-            if (count($node->implements)){
-                $classDTO->setInterfaces($node->implements[0]->parts);
+            if (count($node->implements) && count($node->implements)){
+                $interfaces = array();
+                foreach ($node->implements as $interfaceNode){
+                    array_push($interfaces, implode('\\', $interfaceNode->parts));
+                }
+                $classDTO->setInterfaces($interfaces);
             }
 
             if (!empty($node->extends) && count($node->extends->parts)){
-                $classDTO->setExtend($node->extends->parts[0]);
+                $classDTO->setExtend(implode('\\', $node->extends->parts));
             }
 
             $visitor = new ClassVisitor($classDTO);

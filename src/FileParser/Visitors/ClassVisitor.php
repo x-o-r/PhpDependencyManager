@@ -31,7 +31,7 @@ class ClassVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterf
             foreach ($node->params as $param)
             {
                 if (!empty($param->name) && !empty($param->type) && !empty($param->type->parts)) {
-                    $this->injectedDependencies[$param->name] = $param->type->parts[0];
+                    $this->injectedDependencies[$param->name] = implode('\\', $param->type->parts);
                 }
             }
         }

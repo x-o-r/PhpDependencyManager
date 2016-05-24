@@ -37,15 +37,15 @@ class DependencyExtractor
         }
     }
 
-    public function analyseComponentsDependencies($composerJsonFile) {
+    public function analyseComponentsDependencies($composerJsonFile, $path) {
         $parser = new FileParser\ComposerJsonParser();
         $root_component = $parser->parse($composerJsonFile);
         array_push($this->componentsDTOArray, $root_component);
 
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
-        foreach ($finder->find(dirname($composerJsonFile)) as $file)
+        foreach ($finder->find($path) as $file)
         {
-            if (preg_match('/composer\.json/', $file) && basename($file) !== basename($composerJsonFile)) {
+            if (preg_match('/composer\.json/', $file)) {
                 array_push($this->componentsDTOArray, $parser->parse($file));
             }
         }

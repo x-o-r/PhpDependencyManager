@@ -5,3 +5,4 @@ test/1/vendor
 test/1/composer.lock
 test/2/vendor
 test/2/composer.lock
+test_vendor

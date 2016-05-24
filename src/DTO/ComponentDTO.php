@@ -67,7 +67,6 @@ class ComponentDTO implements ObjectDTOInterface
     public function setNamespaces(array $namespaces)
     {
         foreach($namespaces as $namespace){
-//            array_push($this->namespaces, rtrim(StringFilter::unifyObjectName($namespace), '_'));
             array_push($this->namespaces, rtrim($namespace, '\\'));
         }
     }

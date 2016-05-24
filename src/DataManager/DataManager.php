@@ -121,7 +121,7 @@ class DataManager
                     return;
                 }
                 foreach ($contextObject->getUses() as $use){
-                    if (array_key_exists($use.'\\'.$objectName, $this->existingObjects)){
+                    if (array_key_exists($use.'\\'.$objectName, $this->existingObjects)){ // Current Use + $objectName
                         $srcObject = $this->existingObjects[$use.'\\'.$objectName];
                         $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
                         $this->createRelationHelper($fullObjectName, $relationType, $fullInstanciatedName);
@@ -129,14 +129,14 @@ class DataManager
                     } else {
                         $useParts = explode('\\', $use);
                         $newParts = explode('\\', $objectName);
-                        $lastPartOfCurrentUse =  end($useParts);
-                        $firstPartOfCurrentNew = array_shift($newParts);
-                        if(array_key_exists($lastPartOfCurrentUse . '\\' . $firstPartOfCurrentNew, $this->existingObjects)){
-                            $srcObject = $this->existingObjects[$lastPartOfCurrentUse . '\\' . $firstPartOfCurrentNew];
-                            $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
-                            $this->createRelationHelper($fullObjectName, $relationType, $fullInstanciatedName);
-                            $this->createRelationHelper($fullObjectName, $relationType, $fullInstanciatedName);
-                            return;
+                        if($useParts[count($useParts)-1] == $newParts[0]){ // final part of current use and first part of $objectName
+                            $fullParts = implode('\\', array_unique(array_merge($useParts, $newParts)));
+                            if(array_key_exists($fullParts, $this->existingObjects)){
+                                $srcObject = $this->existingObjects[$fullParts];
+                                $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
+                                $this->createRelationHelper($fullObjectName, $relationType, $fullInstanciatedName);
+                                return;
+                            }
                         }
                     }
                 }
@@ -155,7 +155,7 @@ class DataManager
             }
         }
 
-        // Finally, $instance was not discovered, create it has undiscovered class
+        // Finally, $instance was not discovered, create it as undiscovered class
         // If $instance contains a namespace, add it to his attributes list
         if (!in_array($objectName, $this->undiscoveredObject)) {
             if ($instanceContainsNamespace) {
@@ -228,10 +228,8 @@ class DataManager
             foreach ($componentDTOCollection as $component) {
                 $this->fullComponentCollection[$component->getName()] = $component;
 
-                if (!empty($component->getNamespaces())) {
-                    foreach ($component->getNamespaces() as $rootNamespace) {
-                        $this->componentNamespaceCollection[$rootNamespace] = $component->getName();
-                    }
+                foreach ($component->getNamespaces() as $rootNamespace) {
+                    $this->componentNamespaceCollection[$rootNamespace] = $component->getName();
                 }
             }
         }
@@ -243,6 +241,15 @@ class DataManager
                     $component = $this->fullComponentCollection[$componentName];
                     $this->createNode($componentName, "component", array('name' => $component->getSubName()));
                     $this->createRelation($rootNamespace, "DECLARED_IN_PKG", $componentName);
+                }
+            }
+
+            // Component require another component
+            foreach ($componentDTOCollection as $component) {
+                foreach ($component->getRequires() as $requireName => $version) {
+                    if (array_key_exists($requireName, $this->fullComponentCollection)){
+                        $this->createRelation($component->getName(), "REQUIRE",  $this->fullComponentCollection[$requireName]->getName());
+                    }
                 }
             }
         }

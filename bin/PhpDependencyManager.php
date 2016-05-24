@@ -16,13 +16,13 @@ if (empty($argv[1])) {
 try {
     $dependencyExtractor = new DependencyExtractor();
 
-    echo "+ Recursivly parse PHP files of " . $argv[1] . "\n";
+    echo "+ Recursivly parse PHP files in " . $argv[1] . "\n";
     $dependencyExtractor->analyseObjectDependencies($argv[1]);
 
     if (!empty($argv[2])){
         if (file_exists($argv[2])){
-            echo "+ Recusivly parse composer.json " . $argv[1] . "\n";
-            $dependencyExtractor->analyseComponentsDependencies($argv[2]);
+            echo "+ Recursivly parse composer.json in " . $argv[1] . "\n";
+            $dependencyExtractor->analyseComponentsDependencies($argv[2], $argv[1]);
         }
     }
 
@@ -39,7 +39,7 @@ try {
     $dataManager->sendQuery();
 } catch (ComposerJsonParserException $e){
     echo ($e . "\n");
-} catch (DataManagerException$e)
+} catch (DataManagerException $e)
 {
     echo("Database connection failed with following exceptions : \n$e");
 } catch (Exception $e)
