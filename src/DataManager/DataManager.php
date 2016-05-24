@@ -105,6 +105,11 @@ class DataManager
         if ($instanceContainsNamespace) { // Class name contains namespace and exists in $this->existingObjects
             $objectName = ltrim('\\', $objectName);
             if (array_key_exists($objectName, $this->existingObjects)) {
+//                call_user_func_array([$this, 'createRelation'], [
+//                    $reverseRelation === true ? 0 : 2 => $this->existingObjects[$objectName]->getname(),
+//                    1                                 => $relationType,
+//                    $reverseRelation === true ? 2 : 0 => $objectName
+//                ]);
                 $this->createRelation( $this->existingObjects[$objectName]->getname(), $relationType, $objectName);
                 return;
             }
@@ -115,7 +120,6 @@ class DataManager
             $uses = $contextObject->getUses();
             if (array_key_exists($objectName, $uses)) {
                 if (array_key_exists($uses[$objectName], $this->existingObjects)) {
-                    var_dump($uses[$objectName]);
                     $existingObject = $this->existingObjects[$uses[$objectName]];
                     $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $existingObject->getNamespace() . '\\' . $existingObject->getName()); // Could be replaced by just $instance ?
                     return;
