@@ -13,7 +13,6 @@ class ClassDTO implements ObjectDTOInterface
     private $injectedDependencies = array();
     private $classesInstances = array();
     private $uses = array();
-    private $aliases = array();
 
     /**
      * @return array
@@ -29,22 +28,6 @@ class ClassDTO implements ObjectDTOInterface
     public function setUses($uses)
     {
         $this->uses = $uses;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAliases()
-    {
-        return $this->aliases;
-    }
-
-    /**
-     * @param array $aliases
-     */
-    public function setAliases($aliases)
-    {
-        $this->aliases = $aliases;
     }
 
     /**

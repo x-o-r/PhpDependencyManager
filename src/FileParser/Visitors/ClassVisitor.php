@@ -19,10 +19,8 @@ class ClassVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterf
     {
         if ($node instanceof Node\Expr\New_) {
             if ($node->class instanceof Node\Name) {
-//                $strippedClassName = explode('\\', $node->class->toString());
                 $DTOclassesInstances = $this->classDTO->getClassesInstances();
-//                array_push($DTOclassesInstances,end($strippedClassName));
-                array_push($DTOclassesInstances,$node->class->toString());
+                array_push($DTOclassesInstances,implode('\\', $node->class->parts));
                 $this->classDTO->setClassesInstances($DTOclassesInstances);
             } else {
                 //@TODO : log dynamic instanciation

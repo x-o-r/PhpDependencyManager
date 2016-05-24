@@ -35,7 +35,6 @@ class PhpParser
             foreach ($DTOCollection as $DTO) // @TODO : find a way to set thoses values directly into the visitor
             {
                 $DTO->setUses($visitor->getUses());
-                $DTO->setAliases($visitor->getAliases());
                 $DTO->setNamespace($visitor->getNamespace());
                 $DTO->setRootNamespace($visitor->getRootNamespace());
             }

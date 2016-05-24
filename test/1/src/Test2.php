@@ -6,7 +6,7 @@ class Test2
 {
     public function __construct()
     {
-//        new Test3();
-//        new SubNamespace\Test2();
+        new Test3();
+        new SubNamespace\Test2();
     }
 }

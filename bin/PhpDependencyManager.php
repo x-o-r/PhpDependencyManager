@@ -16,7 +16,7 @@ if (empty($argv[1])) {
 try {
     $dependencyExtractor = new DependencyExtractor();
 
-    echo "+ Recusivly parse PHP files of " . $argv[1] . "\n";
+    echo "+ Recursivly parse PHP files of " . $argv[1] . "\n";
     $dependencyExtractor->analyseObjectDependencies($argv[1]);
 
     if (!empty($argv[2])){

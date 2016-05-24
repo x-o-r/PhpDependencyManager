@@ -14,7 +14,6 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
     private $rootNamespace = null;
     private $objectDTOCollection = array();
     private $uses = array();
-    private $aliases = array();
 
     public function leaveNode(Node $node)
     {
@@ -25,10 +24,8 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
                     if(!array_key_exists($classTarget, $this->uses)) {
                         $this->uses[$classTarget] = implode('\\', $node->name->parts);
                     }
-                } else {
-                    if(!array_key_exists($node->alias, $this->uses)) {
-                        $this->uses[$classTarget] = implode('\\', $node->name->parts);
-                    }
+                } else if(!array_key_exists($node->alias, $this->uses)) {
+                    $this->uses[$node->alias] = implode('\\', $node->name->parts);
                 }
             }
         }
@@ -99,12 +96,6 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
      */
     public function getUses() {
         return $this->uses;
-    }
-    /**
-     * @return array
-     */
-    public function getAliases() {
-        return $this->aliases;
     }
     /**
      * @return array

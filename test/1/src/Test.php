@@ -2,7 +2,9 @@
 
 namespace TestNamespace;
 use TestNamespace\SubNamespace\Test2;
+use TestNamespace\TestInterface\TestIface;
 use OtherNamespace;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 class Test extends TestAbstract implements TestIface

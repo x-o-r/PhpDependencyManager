@@ -1,6 +1,7 @@
 <?php
 
 namespace TestNamespace;
+use TestNamespace\TestInterface\TestIface;
 
 class TestAbstract implements TestIface
 {
