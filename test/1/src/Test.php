@@ -11,7 +11,7 @@ class Test extends TestAbstract implements TestIface
         return new Test2();
     }
 
-    public function abstractMethod(Test2Namespace\Test2SubNamespace\Doctrine $doctrine) {
+    public function abstractMethod(Test2Namespace\Test2SubNamespace\AClass $doctrine) {
         new OtherNamespace\Test3();
         return;
     }

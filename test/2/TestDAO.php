@@ -1,10 +1,12 @@
 <?php
 
-namespace Test1Namespace\Test2SubNamespace;
-use Test2Namespace\Test2SubNamespace\Doctrine;
+namespace Test1Namespace;
+
+use Test2Namespace\Test2SubNamespace\AClass;
+
 class TestDAO
 {
-    public function __construct(Doctrine $doctrineInstance)
+    public function __construct(AClass $aClassInstance)
     {
     }
 }

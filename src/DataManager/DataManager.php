@@ -58,7 +58,7 @@ class DataManager
         }
         $query .= ')';
 
-        if ($nodeType === "class" || $nodeType === "interface" || $nodeType === "namespace" || $nodeType === "undiscovered_object"){
+        if ($nodeType === "class:object" || $nodeType === "interface:object" || $nodeType === "namespace" || $nodeType === "undiscovered_object:object"){
             $this->nodeQueryCollection[$nodeName] = $query;
         }
         if ($nodeType === "component"){
@@ -165,9 +165,9 @@ class DataManager
                     $namespace .= $parts[$i];
                 }
                 $objectName = end($parts);
-                $this->createNode($objectName, "undiscovered_object", array('name' => $objectName, 'namespace' => $namespace));
+                $this->createNode($objectName, "undiscovered_object:object", array('name' => $objectName, 'namespace' => $namespace));
             } else {
-                $this->createNode($objectName, "undiscovered_object", array('name' => $objectName));
+                $this->createNode($objectName, "undiscovered_object:object", array('name' => $objectName));
             }
             array_push($this->undiscoveredObject, $objectName);
         }
@@ -187,11 +187,11 @@ class DataManager
             $this->rootNamespaceCollection[$object->getRootNamespace()] = null; // Only for using the unicity of a sorted map keys
 
             if ($object instanceof ClassDTO) {
-                $this->createNode($objectKey, "class", array ('name' => $object->getName(), 'namespace' => $objectNamespace));
+                $this->createNode($objectKey, "class:object", array ('name' => $object->getName(), 'namespace' => $objectNamespace));
 
             }
             if ($object instanceof InterfaceDTO) {
-                $this->createNode($objectKey, "interface", array ('name' => $object->getName(), 'namespace' => $objectNamespace));
+                $this->createNode($objectKey, "interface:object", array ('name' => $object->getName(), 'namespace' => $objectNamespace));
             }
             
             $this->createNamespace($objectNamespace);

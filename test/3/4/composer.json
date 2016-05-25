@@ -1,0 +1,12 @@
+{
+    "name": "test/test4",
+    "minimum-stability": "dev",
+	"autoload": {
+       	"psr-4": {
+			"Test4Namespace\\": "./"
+		}
+  	},
+    "require": {
+        "test/test1": "^3.3"
+    }
+}

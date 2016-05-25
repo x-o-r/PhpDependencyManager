@@ -1,14 +1,13 @@
 <?php
 
-namespace Test2Namespace\Test2SubNamespace\Test2SubSubNamespace\blabla;
-use Test2Namespace\Test2SubNamespace\Doctrine;
-use Test1Namespace\Test2SubNamespace\TestDAO;
+namespace Test2Namespace\Test2SubNamespace;
+use Test1Namespace\TestDAO;
 
 class TestFactory
 {
     public static function getInstance()
     {
-        new Toto();
-        return new TestDAO(new Doctrine());
+        new OutOfAnalyseClass();
+        return new TestDAO(new AClass());
     }
 }
