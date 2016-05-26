@@ -2,16 +2,41 @@
 
 namespace PhpDependencyManager\DTO;
 
-class ComponentDTO implements ObjectDTOInterface
+class ComponentDTO implements DTOInterface
 {
-    private $name = null;
-    private $mainName = null;
-    private $subName = null;
+    private $name;
+    private $mainName;
+    private $subName;
     private $namespaces = array();
     private $requires = array();
 
     /**
-     * @return null
+     * @return string
+     * @throws DTOException
+     */
+    public function getName()
+    {
+        if ($this->name === null) {
+            throw new DTOException(__CLASS__ . " : component name cannot be null");
+        }
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+        $parts = explode('/', $name);
+        if (count($parts)>=2){
+            $this->mainName = $parts[0];
+            $this->subName = $parts[1];
+        }
+    }
+
+    /**
+     * @return string|null
      */
     public function getMainName()
     {
@@ -22,7 +47,7 @@ class ComponentDTO implements ObjectDTOInterface
     }
 
     /**
-     * @return null
+     * @return string|null
      */
     public function getSubName()
     {
@@ -30,27 +55,6 @@ class ComponentDTO implements ObjectDTOInterface
             return $this->getName();
         }
         return $this->subName;
-    }
-
-    /**
-     * @return null
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param null $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        $parts = explode('/', $name);
-        if (count($parts)>=2){
-            $this->mainName = $parts[0];
-            $this->subName = $parts[1];
-        }
     }
 
     /**
@@ -82,7 +86,7 @@ class ComponentDTO implements ObjectDTOInterface
     /**
      * @param array $requires
      */
-    public function setRequires($requires)
+    public function setRequires(array $requires)
     {
         $this->requires = $requires;
     }

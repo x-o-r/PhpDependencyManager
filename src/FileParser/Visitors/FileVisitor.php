@@ -10,8 +10,8 @@ use PhpParser\NodeTraverser;
 
 class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $namespace = null;
-    private $rootNamespace = null;
+    private $namespace;
+    private $rootNamespace;
     private $objectDTOCollection = array();
     private $uses = array();
 
@@ -21,17 +21,17 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
             if (is_array($node->name->parts) && count($node->name->parts)) {
                 $classTarget = end($node->name->parts);
                 if ($classTarget === $node->alias) {
-                    if(!array_key_exists($classTarget, $this->uses)) {
+                    if (!array_key_exists($classTarget, $this->uses)) {
                         $this->uses[$classTarget] = implode('\\', $node->name->parts);
                     }
-                } else if(!array_key_exists($node->alias, $this->uses)) {
+                } else if (!array_key_exists($node->alias, $this->uses)) {
                     $this->uses[$node->alias] = implode('\\', $node->name->parts);
                 }
             }
         }
 
         if ($node instanceof Node\Stmt\Namespace_) {
-            if(!is_null($node->name) && !is_null($node->name->parts)&&is_array($node->name->parts)){
+            if ($node->name !== null && $node->name->parts !== null && is_array($node->name->parts)){
                 $partsCount = count($node->name->parts);
                 if (is_array($node->name->parts) && $partsCount) {
                     $namespace = $node->name->parts[0];

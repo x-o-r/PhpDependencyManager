@@ -1,6 +1,8 @@
 vendor
 .idea
 bin/query.log
+doc/specs.txt
+public
 test/1/vendor
 test/1/composer.lock
 test/2/vendor

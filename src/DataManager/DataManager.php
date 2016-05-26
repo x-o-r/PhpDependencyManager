@@ -8,8 +8,8 @@ use PhpDependencyManager\StringFilter;
 
 class DataManager
 {
-    private $client = null;
-    private $query = null;
+    private $client;
+    private $query;
     private $existingObjects = array();
     private $rootNamespaceCollection = array();
     private $componentNamespaceCollection = array();
@@ -31,7 +31,7 @@ class DataManager
     }
 
     public function sendQuery(){
-        if(!is_null($this->client)){
+        if ($this->client !== null){
             $this->client->sendCypherQuery($this->query);
         }
     }
@@ -72,12 +72,12 @@ class DataManager
 
     private function createNamespace($namespace) {
         if (!empty($namespace)) {
-            if(!in_array($namespace, $this->createdNamespace)) {
+            if (!in_array($namespace, $this->createdNamespace)) {
                 $namespaceParts = explode('\\', $namespace);
                 $fullNamespace = null;
                 $previousNamespace = null;
                 foreach ($namespaceParts as $part) {
-                    if(empty($fullNamespace)){
+                    if (empty($fullNamespace)){
                         $fullNamespace = $part;
                         $this->createNode($fullNamespace, "namespace", array('name' => $part));
                     } else{
@@ -106,6 +106,7 @@ class DataManager
 
         // Check if class name has a namespace
         $instanceContainsNamespace = preg_match('/\\\\/', $objectName);
+        $objectNameExploded = explode('\\', $objectName);
 
         if ($instanceContainsNamespace) { // Class name contains namespace and exists in $this->existingObjects
 
@@ -128,10 +129,9 @@ class DataManager
                         return;
                     } else {
                         $useParts = explode('\\', $use);
-                        $newParts = explode('\\', $objectName);
-                        if($useParts[count($useParts)-1] == $newParts[0]){ // final part of current use and first part of $objectName
-                            $fullParts = implode('\\', array_unique(array_merge($useParts, $newParts)));
-                            if(array_key_exists($fullParts, $this->existingObjects)){
+                        if ($useParts[count($useParts)-1] == $objectNameExploded[0]){ // Final part of current use and first part of $objectName
+                            $fullParts = implode('\\', array_unique(array_merge($useParts, $objectNameExploded)));
+                            if (array_key_exists($fullParts, $this->existingObjects)){
                                 $srcObject = $this->existingObjects[$fullParts];
                                 $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
                                 $this->createRelationHelper($fullObjectName, $relationType, $fullInstanciatedName);
@@ -159,12 +159,11 @@ class DataManager
         // If $instance contains a namespace, add it to his attributes list
         if (!in_array($objectName, $this->undiscoveredObject)) {
             if ($instanceContainsNamespace) {
-                $parts = explode('\\', $objectName);
-                $namespace = $parts[0];
-                for ($i = 1; $i < count($parts) - 1; $i++) {
-                    $namespace .= $parts[$i];
+                $namespace = $objectNameExploded[0];
+                for ($i = 1; $i < count($objectNameExploded) - 1; $i++) {
+                    $namespace .= $objectNameExploded[$i];
                 }
-                $objectName = end($parts);
+                $objectName = end($objectNameExploded);
                 $this->createNode($objectName, "undiscovered_object:object", array('name' => $objectName, 'namespace' => $namespace));
             } else {
                 $this->createNode($objectName, "undiscovered_object:object", array('name' => $objectName));
@@ -174,9 +173,12 @@ class DataManager
         $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $objectName);
     }
 
-    public function createSchema(array $objectDTOCollection, array $componentDTOCollection = null) {
+    /**
+     * @param array $objectDTOCollection
+     * @param array $componentDTOCollection
+     */
+    public function createSchema(array $objectDTOCollection, array $componentDTOCollection) {
 
-//        var_dump($objectDTOCollection);exit;
         foreach (array_keys($objectDTOCollection) as $objectKey) {
             $object = $objectDTOCollection[$objectKey];
             $objectNamespace = $object->getNamespace();
@@ -224,17 +226,15 @@ class DataManager
         }
 
         // Component
-        if (!is_null($componentDTOCollection)) {
-            foreach ($componentDTOCollection as $component) {
-                $this->fullComponentCollection[$component->getName()] = $component;
+        foreach ($componentDTOCollection as $component) {
+            $this->fullComponentCollection[$component->getName()] = $component;
 
-                foreach ($component->getNamespaces() as $rootNamespace) {
-                    $this->componentNamespaceCollection[$rootNamespace] = $component->getName();
-                }
+            foreach ($component->getNamespaces() as $rootNamespace) {
+                $this->componentNamespaceCollection[$rootNamespace] = $component->getName();
             }
         }
 
-        if (!is_null($this->fullComponentCollection)) {
+        if ($this->fullComponentCollection !== null) {
             foreach (array_keys($this->rootNamespaceCollection) as $rootNamespace) {
                 if (array_key_exists($rootNamespace, $this->componentNamespaceCollection)) {
                     $componentName = $this->componentNamespaceCollection[$rootNamespace];

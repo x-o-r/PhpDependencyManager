@@ -9,7 +9,8 @@ use PhpDependencyManager\DataManager\DataManagerException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-if (empty($argv[1])) {
+if (empty($argv[1]) || !is_dir($argv[1])) {
+    echo "usage : PhpDependencyManager $1 -> php sources directory $2{optional} -> path/to/root/composer.json\n";
     exit;
 }
 
@@ -19,7 +20,7 @@ try {
     echo "+ Recursivly parse PHP files in " . $argv[1] . "\n";
     $dependencyExtractor->analyseObjectDependencies($argv[1]);
 
-    if (!empty($argv[2])){
+    if (!empty($argv[2]) && is_file($argv[2])){
         if (file_exists($argv[2])){
             echo "+ Recursivly parse composer.json in " . $argv[1] . "\n";
             $dependencyExtractor->analyseComponentsDependencies($argv[2], $argv[1]);

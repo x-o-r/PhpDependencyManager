@@ -7,7 +7,7 @@ use PhpParser\NodeVisitorAbstract;
 
 class InterfaceVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $interfaceDTO = null;
+    private $interfaceDTO;
 
     public function __construct(InterfaceDTO $interfaceDTO)
     {
@@ -16,7 +16,6 @@ class InterfaceVisitor extends NodeVisitorAbstract implements NodeDataExchangeIn
 
     public function leaveNode(Node $node)
     {
-        //
     }
 
     public function getDTO()

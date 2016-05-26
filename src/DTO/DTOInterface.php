@@ -2,7 +2,7 @@
 
 namespace PhpDependencyManager\DTO;
 
-interface ObjectDTOInterface
+interface DTOInterface
 {
     /**
      * @return string
@@ -10,7 +10,7 @@ interface ObjectDTOInterface
     public function getName();
 
     /**
-     * @param $string
+     * @param string $name
      */
-    public function setName($string);
+    public function setName($name);
 }

@@ -7,8 +7,8 @@ use PhpParser\ParserFactory;
 
 class PhpParser
 {
-    private $parser = null;
-    private $traverser = null;
+    private $parser;
+    private $traverser;
 
     public function __construct(){
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
@@ -26,8 +26,6 @@ class PhpParser
             $visitor = new Visitors\FileVisitor();
             $this->traverser->addVisitor($visitor);
             $stmts = $this->parser->parse(file_get_contents($fileToParse));
-//            echo($fileToParse . "\n");
-//            var_dump($stmts);
             $this->traverser->traverse($stmts);
             $this->traverser->removeVisitor($visitor);
             $DTOCollection = $visitor->getDTO();

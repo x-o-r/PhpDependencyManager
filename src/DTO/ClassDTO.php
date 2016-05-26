@@ -2,17 +2,93 @@
 
 namespace PhpDependencyManager\DTO;
 
-class ClassDTO implements ObjectDTOInterface
+class ClassDTO implements DTOInterface
 {
-    private $className = null;
-    private $namespace = null;
-    private $rootNamespace = null;
+    private $className;
+    private $namespace;
+    private $rootNamespace;
+    private $extend;
 
-    private $extend = null;
+    private $uses = array();
     private $interfaces = array();
     private $injectedDependencies = array();
     private $classesInstances = array();
-    private $uses = array();
+
+    /**
+     * @return string
+     * @throws DTOException
+     */
+    public function getName()
+    {
+        if ($this->className === null) {
+            throw new DTOException(__CLASS__ . " : class name cannot be null");
+        }
+        return $this->className;
+    }
+
+    /**
+     * @param string $className
+     */
+    public function setName($className)
+    {
+        $this->className = $className;
+    }
+
+    /**
+     * @return string
+     * @throws DTOException
+     */
+    public function getNamespace()
+    {
+        if ($this->namespace === null) {
+            throw new DTOException(__CLASS__ . " : namespace cannot be null");
+        }
+        return $this->namespace;
+    }
+
+    /**
+     * @param string $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
+
+    /**
+     * @return string
+     * @throws DTOException
+     */
+    public function getRootNamespace()
+    {
+        if ($this->rootNamespace === null) {
+            throw new DTOException(__CLASS__ . " : root namespace cannot be null");
+        }
+        return $this->rootNamespace;
+    }
+
+    /**
+     * @param string $rootNamespace
+     */
+    public function setRootNamespace($rootNamespace)
+    {
+        $this->rootNamespace = $rootNamespace;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getExtend()
+    {
+        return $this->extend;
+    }
+
+    /**
+     * @param string $extend
+     */
+    public function setExtend($extend)
+    {
+        $this->extend = $extend;
+    }
 
     /**
      * @return array
@@ -25,62 +101,13 @@ class ClassDTO implements ObjectDTOInterface
     /**
      * @param array $uses
      */
-    public function setUses($uses)
+    public function setUses(array $uses)
     {
         $this->uses = $uses;
     }
 
     /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->className;
-    }
-
-    /**
-     * @param mixed $className
-     */
-    public function setName($className)
-    {
-//        $this->className = $className, StringFilter::INVALID_SYMS;
-        $this->className = $className;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNamespace()
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * @param mixed $namespace
-     */
-    public function setNamespace($namespace)
-    {
-        $this->namespace = $namespace;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getExtend()
-    {
-        return $this->extend;
-    }
-
-    /**
-     * @param mixed $extend
-     */
-    public function setExtend($extend)
-    {
-        $this->extend = $extend;
-    }
-
-    /**
-     * @return mixed
+     * @return array
      */
     public function getInterfaces()
     {
@@ -88,15 +115,15 @@ class ClassDTO implements ObjectDTOInterface
     }
 
     /**
-     * @param mixed $interfaces
+     * @param array $interfaces
      */
-    public function setInterfaces($interfaces)
+    public function setInterfaces(array $interfaces)
     {
         $this->interfaces = $interfaces;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function getInjectedDependencies()
     {
@@ -104,9 +131,9 @@ class ClassDTO implements ObjectDTOInterface
     }
 
     /**
-     * @param mixed $injectedDependencies
+     * @param array $injectedDependencies
      */
-    public function setInjectedDependencies($injectedDependencies)
+    public function setInjectedDependencies(array $injectedDependencies)
     {
         $this->injectedDependencies = $injectedDependencies;
     }
@@ -122,24 +149,8 @@ class ClassDTO implements ObjectDTOInterface
     /**
      * @param array $classesInstances
      */
-    public function setClassesInstances($classesInstances)
+    public function setClassesInstances(array $classesInstances)
     {
         $this->classesInstances = $classesInstances;
-    }
-
-    /**
-     * @return null
-     */
-    public function getRootNamespace()
-    {
-        return $this->rootNamespace;
-    }
-
-    /**
-     * @param null $rootNamespace
-     */
-    public function setRootNamespace($rootNamespace)
-    {
-        $this->rootNamespace = $rootNamespace;
     }
 }
