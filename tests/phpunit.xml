@@ -1,0 +1,15 @@
+<phpunit
+        bootstrap="../vendor/autoload.php"
+        colors="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true">
+    <php>
+        <ini name="error_reporting" value="-1" />
+        <ini name="display_errors" value="1" />
+    </php>
+    <testsuite name="PhpDependencyManager tests suite">
+        <file>GraphDatabaseManager/Neo4JFactoryTest.php</file>
+        <file>GraphDatabaseManager/Neo4JNodeManager.php</file>
+    </testsuite>
+</phpunit>

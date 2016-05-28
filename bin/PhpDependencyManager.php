@@ -2,10 +2,11 @@
 
 namespace PhpDependencyManager\Bin;
 
-use PhpDependencyManager\Datamanager\DataManagerFactory;
+use PhpDependencyManager\GraphDatabaseManager\GraphDatabaseManagerException;
 use PhpDependencyManager\Extractor\DependencyExtractor;
 use PhpDependencyManager\FileParser\ComposerJsonParserException;
-use PhpDependencyManager\DataManager\DataManagerException;
+use PhpDependencyManager\GraphDatabaseManager\Neo4JFactory;
+use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -27,23 +28,35 @@ try {
         }
     }
 
-    $dataManager = DataManagerFactory::getInstance();
+    $neo4JClient = Neo4JFactory::getNeo4JClient(array('host'=>'localhost', 'port'=>'7474'));
+    $neo4JNodeManager = new Neo4JNodeManager($neo4JClient);
 
-    echo "+ Drop previous schema \n";
-    $dataManager->dropSchema();
+
+    /*
+    $dataManager = new DataManager();
 
     echo "+ Create schema (see bin/query.log)\n";
-    $dataManager->createSchema($dependencyExtractor->getObjectDTOArray(), $dependencyExtractor->getComponentsDTOArray());
-    file_put_contents(__DIR__. '/query.log', $dataManager->dumpObjectAndRelation());
+    $dataManager->createSchema($dependencyExtractor->getDTOCollection());
+
+    $dBdriver = new Neo4JDriver(array('schema' => "default", 'url' => "http://localhost:7474"));
+
+    echo "+ Drop previous schema \n";
+    $dBdriver->dropData(true);
 
     echo "+ Sending query \n";
-    $dataManager->sendQuery();
+    $queries = array_merge(
+        array_values($dataManager->nodeQueryCollection),
+        array_values($dataManager->realComponentQueryCollection),
+        array_values($dataManager->relationQueryCollection)
+    );
+    $dump = implode($queries);
+    $dBdriver->executeQueries($queries);
+    file_put_contents(__DIR__. '/query.log',$dump);
+        */
 } catch (ComposerJsonParserException $e){
     echo ($e . "\n");
-} catch (DataManagerException $e)
-{
-    echo("Database connection failed with following exceptions : \n$e");
-} catch (Exception $e)
-{
+} catch (DataBaseDriverException $e) {
+    echo ($e . "\n");
+} catch (Exception $e) {
     echo ($e . "\n");
 }

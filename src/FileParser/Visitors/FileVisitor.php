@@ -1,19 +1,16 @@
 <?php
 
 namespace PhpDependencyManager\FileParser\Visitors;
-use PhpDependencyManager\DTO\ClassDTO;
-use PhpDependencyManager\DTO\InterfaceDTO;
-use PhpDependencyManager\StringFilter\StringFilter;
 use PhpParser\Node;
-use PhpParser\NodeVisitorAbstract;
 use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitorAbstract;
 
 class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
-    private $namespace;
-    private $rootNamespace;
-    private $objectDTOCollection = array();
-    private $uses = array();
+    protected $namespace;
+    protected $rootNamespace;
+    protected $uses = array();
+    protected $nodeCollection = array();
 
     public function leaveNode(Node $node)
     {
@@ -45,6 +42,8 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
         }
 
         if ($node instanceof Node\Stmt\Interface_) {
+            $classVisitor = new ClassVisitor();
+            $classVisitor->namespace = $this->namespace;
             $interfaceDTO = new InterfaceDTO();
             $traverser = new NodeTraverser();
             $interfaceDTO->setName($node->name);

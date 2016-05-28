@@ -8,43 +8,16 @@ use PhpDependencyManager\StringFilter;
 
 class DataManager
 {
-    private $client;
-    private $query;
+    
     private $existingObjects = array();
     private $rootNamespaceCollection = array();
     private $componentNamespaceCollection = array();
     private $fullComponentCollection = array();
-    private $realComponentQueryCollection = array();
-    private $nodeQueryCollection = array();
-    private $relationQueryCollection = array();
+    public $realComponentQueryCollection = array();
+    public $nodeQueryCollection = array();
+    public $relationQueryCollection = array();
     private $undiscoveredObject = array();
     private $createdNamespace = array();
-
-    public function __construct($neo4jClient)
-    {
-        $this->client = $neo4jClient;
-        $this->query = array();
-    }
-
-    public function getQuery() {
-        return $this->query;
-    }
-
-    public function sendQuery(){
-        if ($this->client !== null){
-            $this->client->sendCypherQuery($this->query);
-        }
-    }
-
-    public function dumpObjectAndRelation(){
-        return  implode("\n", array_values($this->nodeQueryCollection)) . "\n" .
-                implode("\n", array_values($this->realComponentQueryCollection)) . "\n" .
-                implode("\n", array_values($this->relationQueryCollection));
-    }
-
-    public function dropSchema() {
-        $this->client->sendCypherQuery("MATCH (n) detach delete n");
-    }
 
     private function createNode($nodeName, $nodeType, $attributes = null) {
         $query = "CREATE (`" . $nodeName . "`:" . $nodeType;
@@ -173,6 +146,36 @@ class DataManager
         $this->createRelation($contextObject->getNamespace() . '\\' . $contextObject->getName(), $relationType, $objectName);
     }
 
+        public function createEntities(array $DTOCollection) {
+        foreach (array_keys($DTOCollection) as $entityKey) {
+            $entity = $DTOCollection[$entityKey];
+
+            try {
+                $objectNamespace = $entity->getNamespace();
+                $this->rootNamespaceCollection[$entity->getRootNamespace()] = null; // Only for using the unicity of a sorted map keys
+                if ($entity instanceof ClassDTO) {
+                    $this->createNode($entityKey, "class:object", array ('name' => $entity->getName(), 'namespace' => $objectNamespace));
+
+                }
+                if ($entity instanceof InterfaceDTO) {
+                    $this->createNode($entityKey, "interface:object", array ('name' => $entity->getName(), 'namespace' => $objectNamespace));
+                }
+            } catch (DTOException $dtoException) {
+                // @TODO : Log that object has an empty member
+                continue;
+            }
+
+            if (empty($objectNamespace)){
+                continue;
+            }
+            $this->existingObjects[$entityKey] = $entity;
+
+
+            $this->createNamespace($objectNamespace);
+            $this->createRelation($entityKey, "HAS_NS", $objectNamespace);
+        }
+    }
+
     /**
      * @param array $objectDTOCollection
      * @param array $componentDTOCollection
@@ -257,8 +260,6 @@ class DataManager
         $objects    = implode (' ', array_values($this->nodeQueryCollection));
         $components = implode (' ', array_values($this->realComponentQueryCollection));
         $relations  = implode (' ', array_values($this->relationQueryCollection));
-
-        $this->query = $objects.$components.$relations;
     }
 }
 

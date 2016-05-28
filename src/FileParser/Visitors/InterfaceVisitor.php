@@ -1,7 +1,6 @@
 <?php
 
 namespace PhpDependencyManager\FileParser\Visitors;
-use PhpDependencyManager\DTO\InterfaceDTO;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 

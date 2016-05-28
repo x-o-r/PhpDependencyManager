@@ -7,11 +7,10 @@ use Exception;
 
 class DependencyExtractor
 {
-    private $objectDTOArray = array();
-    private $componentsDTOArray = array();
+    private $DTOCollection = array();
 
-    public function getObjectDTOArray() {
-        return $this->objectDTOArray;
+    public function getDTOCollection() {
+        return $this->DTOCollection;
     }
 
     public function getComponentsDTOArray() {
@@ -40,13 +39,13 @@ class DependencyExtractor
     public function analyseComponentsDependencies($composerJsonFile, $path) {
         $parser = new FileParser\ComposerJsonParser();
         $root_component = $parser->parse($composerJsonFile);
-        array_push($this->componentsDTOArray, $root_component);
+        array_push($this->DTOCollection, $root_component);
 
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
         foreach ($finder->find($path) as $file)
         {
             if (preg_match('/composer\.json/', $file)) {
-                array_push($this->componentsDTOArray, $parser->parse($file));
+                array_push($this->DTOCollection, $parser->parse($file));
             }
         }
     }
