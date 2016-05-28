@@ -8,7 +8,7 @@ use PhpDependencyManager\StringFilter;
 
 class DataManager
 {
-    
+
     private $existingObjects = array();
     private $rootNamespaceCollection = array();
     private $componentNamespaceCollection = array();
@@ -189,7 +189,7 @@ class DataManager
                 continue;
             }
             $this->existingObjects[$objectKey] = $object;
-            $this->rootNamespaceCollection[$object->getRootNamespace()] = null; // Only for using the unicity of a sorted map keys
+            $this->rootNamespaceCollection[$object->getRootNamespace()] = null; // Only to use the unicity of a sorted map keys
 
             if ($object instanceof ClassDTO) {
                 $this->createNode($objectKey, "class:object", array ('name' => $object->getName(), 'namespace' => $objectNamespace));

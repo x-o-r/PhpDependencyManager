@@ -11,8 +11,7 @@ class Neo4JFactory
      * @return Client|null
      * @throws GraphDatabaseManagerException
      */
-    public static function getNeo4JClient(array $connectionProperties)
-    {
+    public static function getNeo4JClient(array $connectionProperties)  {
         if (!array_key_exists('host', $connectionProperties) || !array_key_exists('port', $connectionProperties)) {
             throw new GraphDatabaseManagerException(__CLASS__ . " : Keys 'host' and 'port' must be defined");
         }

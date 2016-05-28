@@ -5,8 +5,16 @@ use PhpDependencyManager\DTO\ClassDTO;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
-class ClassVisitor extends FileVisitor implements NodeDataExchangeInterface
+class ClassVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterface
 {
+    private $classDTO;
+    private $injectedDependencies = array();
+
+    public function __construct(ClassDTO $classDTO)
+    {
+        $this->classDTO = $classDTO;
+    }
+
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Expr\New_) {

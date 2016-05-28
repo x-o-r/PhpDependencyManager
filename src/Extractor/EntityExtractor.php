@@ -1,11 +1,13 @@
 <?php
 namespace PhpDependencyManager\Extractor;
 
-use PhpDependencyManager\FileParser;
+use PhpDependencyManager\FileParser\PhpParser;
+use PhpDependencyManager\FileParser\ComposerJsonParser;
 use Hal\Component\File\Finder;
 use Exception;
+use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
 
-class DependencyExtractor
+class EntityExtractor
 {
     private $DTOCollection = array();
 
@@ -17,16 +19,16 @@ class DependencyExtractor
         return $this->componentsDTOArray;
     }
 
-    public function analyseObjectDependencies($path) {
+    public function extractObject($path) {
         $finder = new Finder();
         foreach ($finder->find($path) as $file)
         {
             // @TODO : Check syntax first
-            $parser = new FileParser\PhpParser();
+            $parser = new PhpParser();
             try {
                 foreach($parser->parse($file) as $object)
                 {
-                    $this->objectDTOArray[$object->getNamespace() . '\\' . $object->getName()] = $object;
+                    $this->DTOCollection[$object->getNamespace() . '\\' . $object->getName()] = $object;
                 }
             } catch (Exception $e)
             {
@@ -36,11 +38,8 @@ class DependencyExtractor
         }
     }
 
-    public function analyseComponentsDependencies($composerJsonFile, $path) {
-        $parser = new FileParser\ComposerJsonParser();
-        $root_component = $parser->parse($composerJsonFile);
-        array_push($this->DTOCollection, $root_component);
-
+    public function extractComponent($composerJsonFile, $path) {
+        $parser = new ComposerJsonParser();
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
         foreach ($finder->find($path) as $file)
         {

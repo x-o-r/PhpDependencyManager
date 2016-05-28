@@ -2,8 +2,11 @@
 
 namespace PhpDependencyManager\Bin;
 
+use Hoa\Iterator\Map;
+use PhpDependencyManager\Entities\MapEntities;
 use PhpDependencyManager\GraphDatabaseManager\GraphDatabaseManagerException;
-use PhpDependencyManager\Extractor\DependencyExtractor;
+use PhpDependencyManager\Extractor\EntityExtractor;
+use PhpDependencyManager\Extractor\RelationExtractor;
 use PhpDependencyManager\FileParser\ComposerJsonParserException;
 use PhpDependencyManager\GraphDatabaseManager\Neo4JFactory;
 use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
@@ -16,22 +19,23 @@ if (empty($argv[1]) || !is_dir($argv[1])) {
 }
 
 try {
-    $dependencyExtractor = new DependencyExtractor();
+    $entityExtractor = new EntityExtractor();
 
     echo "+ Recursivly parse PHP files in " . $argv[1] . "\n";
-    $dependencyExtractor->analyseObjectDependencies($argv[1]);
+    $entityExtractor->extractObject($argv[1]);
 
     if (!empty($argv[2]) && is_file($argv[2])){
         if (file_exists($argv[2])){
             echo "+ Recursivly parse composer.json in " . $argv[1] . "\n";
-            $dependencyExtractor->analyseComponentsDependencies($argv[2], $argv[1]);
+            $entityExtractor->extractComponent($argv[2], $argv[1]);
         }
     }
 
     $neo4JClient = Neo4JFactory::getNeo4JClient(array('host'=>'localhost', 'port'=>'7474'));
     $neo4JNodeManager = new Neo4JNodeManager($neo4JClient);
-
-
+    $mapEntities = new MapEntities($neo4JNodeManager);
+    $mapEntities->dispatchEntities($entityExtractor->getDTOCollection());
+    
     /*
     $dataManager = new DataManager();
 

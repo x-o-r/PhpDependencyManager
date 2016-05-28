@@ -1,6 +1,6 @@
 <?php
 
-namespace Test4Namespace;
+namespace Test4Namespace\SubTest4Namespace;
 
 class C_Class
 {

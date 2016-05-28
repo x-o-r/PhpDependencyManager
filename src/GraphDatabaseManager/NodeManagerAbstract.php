@@ -11,6 +11,10 @@ abstract class NodeManagerAbstract implements NodeManagerInterface
         $this->graphDatabaseHandler = $graphDatabaseHandler;
     }
     abstract public function addNode($nodeFullNamespace, array $properties, array $label);
-    abstract public function addRelation($startNode, $relationType, $endNode);
+    abstract public function addRelation($startNode, $endNode, $relationType, array $relationProperties = null);
     abstract public function getNode($nodeFullNamespace);
+
+    public function getNodeCollectionKeys() {
+        return array_keys($this->nodeCollection);
+    }
 }

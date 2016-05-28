@@ -4,6 +4,10 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use PhpDependencyManager\GraphDatabaseManager\Neo4JFactory;
 use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
+use Everyman\Neo4j\Node;
+use Everyman\Neo4j\Client;
+use Everyman\Neo4j\Cypher\Query;
+use Everyman\Neo4j\Relationship;
 
 if (empty($argv[1])) {
     die("Neo4j package must be specified [Everyman/Neo4j, Neoxygen/NeoClient, graphaware/neo4j-php-client]\n");
@@ -13,33 +17,40 @@ switch ($argv[1])
 {
     case "Everyman/Neo4j" :
 
-        $client = Neo4JFactory::getNeo4JClient(array('host'=>'localhost', 'port'=>'7474'));
-        $nodeManager = new Neo4JNodeManager($client);
-
+        $client = new Client('localhost', 7474);
+        /*
         $node = $nodeManager->addNode("A\\Name\\Space\\MyClass", array('name' => 'MyClass', 'fullnamespace' => "A\\Name\\Space\\MyClass"), array('class'));
         $client->deleteNode($node);
+        */
+
+        $transaction = $client->beginTransaction();
+        $query = new Query($client, 'MATCH (n) DETACH DELETE n');
+        $transaction->addStatements($query);
+        $transaction->commit();
+
+
+        $transaction = $client->beginTransaction();
+        $classLabel = $client->makeLabel("class");
+
+        $node1 = $client->makeNode()->setProperty('name', "n1")->save();
+        $node1->addLabels(array($classLabel));
+        $node2 = $client->makeNode()->setProperty('name', "n2")->save();
+        $node2->addLabels(array($classLabel));
+        $transaction->commit();
+
+        $transaction = $client->beginTransaction();
+        $relation = $client->makeRelationship();
+        $relation->setStartNode($node1)->setEndNode($node2)->setType('LINK')->save();
+        $transaction->commit();
+
+        $node1Relationships = $node1->getRelationships(array('LINK'), Relationship::DirectionOut);
+        var_dump($node1Relationships);
 
         /*
-       $transaction = $client->beginTransaction();
-       $query = new Everyman\Neo4j\Cypher\Query($client, 'MATCH (n) DETACH DELETE n');
-       $transaction->addStatements($query);
-       $transaction->commit();
+        $transaction = $client->beginTransaction();
+        $classLabel = $client->makeLabel("class");
 
-       $classLabel = $client->makeLabel("class");
-
-       $node1 = $client->makeNode()->setProperty('name', "n1")->save();
-       $node2 = $client->makeNode()->setProperty('name', "n2")->save();
-
-       $client->getNode($node1->getId())->addLabels(array($classLabel));
-       $client->getNode($node2->getId())->addLabels(array($classLabel));
-       $relation = $client->makeRelationship();
-       $relation->setStartNode($node1)->setEndNode($node2)->setType('LINK')->save();
-
-
-       $transaction = $client->beginTransaction();
-       $classLabel = $client->makeLabel("class");
-
-       for($i=0; $i < 10000; $i++){
+        for($i=0; $i < 10000; $i++){
            try{
                if ($i % 100 === 0) { // @TODO add const for max commit number
                    $transaction->commit();
@@ -51,8 +62,8 @@ switch ($argv[1])
                $transaction->rollback();
                Throw new Exception($e);
            }
-       }
-       $transaction->commit();
+        }
+        $transaction->commit();
        */
 
         break;
