@@ -27,6 +27,9 @@ class Neo4JNodeManagerTest extends PHPUnit_Framework_TestCase
 
     protected function tearDown()
     {
+        if ($this->neo4JClient === null) {
+            $this->fail('Neo4J connection failed');
+        }
         $this->neo4JClient->deleteNode($this->node);
         $this->node = null;
     }

@@ -14,7 +14,7 @@ abstract class NodeManagerAbstract implements NodeManagerInterface
     abstract public function addRelation($startNode, $endNode, $relationType, array $relationProperties = null);
     abstract public function getNode($nodeFullNamespace);
 
-    public function getNodeCollectionKeys() {
-        return array_keys($this->nodeCollection);
+    public function getNodeCollection() {
+        return $this->nodeCollection;
     }
 }

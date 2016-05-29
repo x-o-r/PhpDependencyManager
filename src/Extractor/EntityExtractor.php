@@ -38,7 +38,7 @@ class EntityExtractor
         }
     }
 
-    public function extractComponent($composerJsonFile, $path) {
+    public function extractComponent($path) {
         $parser = new ComposerJsonParser();
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
         foreach ($finder->find($path) as $file)
