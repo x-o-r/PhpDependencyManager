@@ -30,12 +30,12 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
         }
 
         if ($node instanceof Node\Stmt\Namespace_) {
-            if ($node->name !== null && $node->name->parts !== null && is_array($node->name->parts)){
+            if ($node->name !== null && $node->name->parts !== null && is_array($node->name->parts)) {
                 $partsCount = count($node->name->parts);
                 if (is_array($node->name->parts) && $partsCount) {
                     $namespace = $node->name->parts[0];
                     $this->rootNamespace = $namespace;
-                    for ($i=1; $i<$partsCount; $i++){
+                    for ($i = 1; $i<$partsCount; $i++) {
                         $namespace .= '\\' . $node->name->parts[$i];
                     }
                     $this->namespace = $namespace;
@@ -66,15 +66,15 @@ class FileVisitor extends NodeVisitorAbstract implements NodeDataExchangeInterfa
 
             $classDTO->setName($node->name);
 
-            if (count($node->implements) && count($node->implements)){
+            if (count($node->implements) && count($node->implements)) {
                 $interfaces = array();
-                foreach ($node->implements as $interfaceNode){
+                foreach ($node->implements as $interfaceNode) {
                     array_push($interfaces, implode('\\', $interfaceNode->parts));
                 }
                 $classDTO->setInterfaces($interfaces);
             }
 
-            if (!empty($node->extends) && count($node->extends->parts)){
+            if (!empty($node->extends) && count($node->extends->parts)) {
                 $classDTO->setExtend(implode('\\', $node->extends->parts));
             }
 

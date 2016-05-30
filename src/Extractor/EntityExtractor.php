@@ -21,7 +21,7 @@ class EntityExtractor
             // @TODO : Check syntax first
             $parser = new PhpParser();
             try {
-                foreach($parser->parse($file) as $object)
+                foreach ($parser->parse($file) as $object)
                 {
                     $this->DTOCollection[$object->getID()] = $object;
                 }
@@ -39,7 +39,7 @@ class EntityExtractor
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
         $filesToParse = $finder->find($path);
         if ($rootComposerJsonFile !== null && file_exists($rootComposerJsonFile)) {
-            array_push($filesToParse,$rootComposerJsonFile);
+            array_push($filesToParse, $rootComposerJsonFile);
         }
 
         foreach ($filesToParse as $file)
