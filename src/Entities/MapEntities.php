@@ -89,7 +89,7 @@ class MapEntities
             if ($entity instanceof ClassDTO || $entity instanceof InterfaceDTO) {
                 $this->objects[$id] = $entity;
                 $this->nodeManager->addNode(
-                    $entity->getNamespace(),
+                    $entity->getNamespace() . '\\' . $entity->getName(),
                     array('name' => $entity->getName()),
                     array($this->DTONameToClassmap[get_class($entity)], 'object')
                 );
@@ -100,6 +100,7 @@ class MapEntities
                 $this->nodeManager->addNode($entity->getName(), array('name' => $entity->getName()), array('component'));
             }
         }
+//        var_dump(array_keys($this->nodeManager->getNodeCollection())); exit;
     }
 
     private function handleUndiscoveredEntities($objectName, $contextObject, $relationType) {
@@ -128,16 +129,15 @@ class MapEntities
                     $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
                     $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
                     return;
-                } else {
-                    $useParts = explode('\\', $use);
-                    if ($useParts[count($useParts)-1] == $objectNameExploded[0]){ // Final part of current use and first part of $objectName
-                        $fullParts = implode('\\', array_unique(array_merge($useParts, $objectNameExploded)));
-                        if (array_key_exists($fullParts, $this->objects)){
-                            $srcObject = $this->objects[$fullParts];
-                            $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
-                            $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
-                            return;
-                        }
+                }
+                $useParts = explode('\\', $use);
+                if ($useParts[count($useParts)-1] == $objectNameExploded[0]){ // Final part of current use and first part of $objectName
+                    $fullParts = implode('\\', array_unique(array_merge($useParts, $objectNameExploded)));
+                    if (array_key_exists($fullParts, $this->objects)){
+                        $srcObject = $this->objects[$fullParts];
+                        $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
+                        $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
+                        return;
                     }
                 }
             }

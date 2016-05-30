@@ -7,11 +7,9 @@
 		}
   	},
     "require": {
-        "neoxygen/neoclient": "^3.3",
         "nikic/php-parser": "^2.1",
         "phpmetrics/phpmetrics": "^1.10",
-        "everyman/neo4jphp": "dev-master",
-        "graphaware/neo4j-php-client": "^4.3"
+        "everyman/neo4jphp": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.3"
