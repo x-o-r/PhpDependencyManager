@@ -37,7 +37,7 @@ class MapEntities
         // 1 - create all entities
         $this->dispatchEntities();
 
-        // 2 - create undiscovered entity
+        // 2 - create undiscovered entities
         foreach($this->objects as $objectID => $object) {
             $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
             $this->addRelationHelper($objectID, $object->getNamespace(), "HAS_NS"); // Link object to his namespace
@@ -188,7 +188,7 @@ class MapEntities
             if (!array_key_exists($namespace, $this->namespaces)) {
                 $namespaceParts = explode('\\', $namespace);
                 $fullNamespace = null;
-                $previousNamespace = null;
+
                 foreach ($namespaceParts as $part) {
                     if (empty($fullNamespace)){
                         $fullNamespace = $part;
@@ -236,13 +236,7 @@ class MapEntities
             foreach (array_keys($this->rootNamespaceCollection) as $rootNamespace) {
                 if (array_key_exists($rootNamespace, $this->componentNamespaceCollection)) {
                     $componentName = $this->componentNamespaceCollection[$rootNamespace];
-                    $component = $this->fullComponentCollection[$componentName];
 
-                    try {
-                        //$this->nodeManager->addNode($componentName, array('name' => $component->getSubName()), array("component"));
-                    } catch (Exception $e){
-                        continue;
-                    }
                     $this->nodeManager->addRelation(
                         $this->nodeManager->getNode($rootNamespace),
                         $this->nodeManager->getNode($componentName),

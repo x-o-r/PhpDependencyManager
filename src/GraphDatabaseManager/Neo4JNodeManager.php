@@ -21,15 +21,12 @@ class Neo4JNodeManager extends NodeManagerAbstract
                 throw new GraphDatabaseManagerException(__CLASS__ . ' : node id cannot be empty');
             }
 
-//            if (array_key_exists($nodeID, $this->nodeCollection)) {
-//                throw new GraphDatabaseManagerException(__CLASS__ . ' : node id ' . $nodeID . 'already exists');
-//            }
-
             $labelCollection = array();
 
             foreach($labels as $label) {
                 array_push($labelCollection, $this->graphDatabaseHandler->makeLabel($label));
             }
+            
             $this->graphDatabaseHandler->makeLabel('class');
             $node = $this->graphDatabaseHandler->makeNode()->setProperties($properties)->save();
             $node->addLabels($labelCollection);

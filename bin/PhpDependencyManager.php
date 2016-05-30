@@ -27,6 +27,7 @@ try {
     echo "+ Recursivly parse composer.json in " . $argv[1] . "\n";
     $entityExtractor->extractComponent($argv[1]);
 
+    echo "+ Creating nodes and relations\n";
     $neo4JClient = Neo4JFactory::getNeo4JClient(array('host'=>'localhost', 'port'=>'7474'));
     $neo4JNodeManager = new Neo4JNodeManager($neo4JClient);
     $neo4JNodeManager->deleteAllData();

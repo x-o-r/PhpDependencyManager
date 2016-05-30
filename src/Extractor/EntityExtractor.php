@@ -14,10 +14,6 @@ class EntityExtractor
         return $this->DTOCollection;
     }
 
-    public function getComponentsDTOArray() {
-        return $this->componentsDTOArray;
-    }
-
     public function extractObject($path) {
         $finder = new Finder();
         foreach ($finder->find($path) as $file)
