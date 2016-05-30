@@ -9,25 +9,31 @@ use Everyman\Neo4j\Cypher\Query;
 class Neo4JNodeManager extends NodeManagerAbstract
 {
     /**
-     * @param $nodeFullNamespace
+     * @param $nodeID
      * @param array $properties
      * @param array $labels
      * @return Node
      * @throws GraphDatabaseManagerException
      */
-    public function addNode($nodeFullNamespace, array $properties, array $labels) {
+    public function addNode($nodeID, array $properties, array $labels) {
         try {
-            if (empty($nodeFullNamespace)) {
-                throw new GraphDatabaseManagerException(__CLASS__ . ' : namespace cannot be empty');
+            if (empty($nodeID)) {
+                throw new GraphDatabaseManagerException(__CLASS__ . ' : node id cannot be empty');
             }
+
+//            if (array_key_exists($nodeID, $this->nodeCollection)) {
+//                throw new GraphDatabaseManagerException(__CLASS__ . ' : node id ' . $nodeID . 'already exists');
+//            }
+
             $labelCollection = array();
+
             foreach($labels as $label) {
                 array_push($labelCollection, $this->graphDatabaseHandler->makeLabel($label));
             }
             $this->graphDatabaseHandler->makeLabel('class');
             $node = $this->graphDatabaseHandler->makeNode()->setProperties($properties)->save();
             $node->addLabels($labelCollection);
-            $this->nodeCollection[$nodeFullNamespace] = $node;
+            $this->nodeCollection[$nodeID] = $node;
             return $node;
         } catch (Exception $e) {
             throw new GraphDatabaseManagerException(__CLASS__ . ' : ' . $e);
@@ -50,15 +56,15 @@ class Neo4JNodeManager extends NodeManagerAbstract
     }
 
     /**
-     * @param $nodeFullNamespace
+     * @param $nodeID
      * @return Node
      * @throws GraphDatabaseManagerException
      */
-    public function getNode($nodeFullNamespace) {
-        if(!array_key_exists($nodeFullNamespace,$this->nodeCollection)){
-            Throw new GraphDatabaseManagerException(__CLASS__ . ' : no node found for key ' . $nodeFullNamespace);
+    public function getNode($nodeID) {
+        if(!array_key_exists($nodeID,$this->nodeCollection)){
+            Throw new GraphDatabaseManagerException(__CLASS__ . ' : no node found for key ' . $nodeID);
         }
-        return $this->nodeCollection[$nodeFullNamespace];
+        return $this->nodeCollection[$nodeID];
     }
 
     public function deleteAllData() {

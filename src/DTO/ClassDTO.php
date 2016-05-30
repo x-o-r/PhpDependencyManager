@@ -4,6 +4,7 @@ namespace PhpDependencyManager\DTO;
 
 class ClassDTO implements DTOInterface
 {
+    private $classID;
     private $className;
     private $namespace;
     private $rootNamespace;
@@ -13,6 +14,26 @@ class ClassDTO implements DTOInterface
     private $interfaces = array();
     private $injectedDependencies = array();
     private $classesInstances = array();
+
+    /**
+     * @return string
+     * @throws DTOException
+     */
+    public function getID()
+    {
+        if ($this->classID === null) {
+            throw new DTOException(__CLASS__ . " : class ID must be set");
+        }
+        return $this->classID;
+    }
+
+    /**
+     * @param string $classID
+     */
+    public function setID($classID)
+    {
+        $this->classID = $classID;
+    }
 
     /**
      * @return string

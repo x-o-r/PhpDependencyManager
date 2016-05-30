@@ -7,6 +7,16 @@ interface DTOInterface
     /**
      * @return string
      */
+    public function getID();
+
+    /**
+     * @param string $id
+     */
+    public function setID($id);
+
+    /**
+     * @return string
+     */
     public function getName();
 
     /**

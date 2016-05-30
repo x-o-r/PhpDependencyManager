@@ -12,6 +12,22 @@ class ComponentDTO implements DTOInterface
 
     /**
      * @return string
+     */
+    public function getID()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setID($id)
+    {
+        $this->setName($id);
+    }
+
+    /**
+     * @return string
      * @throws DTOException
      */
     public function getName()

@@ -5,7 +5,6 @@ use PhpDependencyManager\FileParser\PhpParser;
 use PhpDependencyManager\FileParser\ComposerJsonParser;
 use Hal\Component\File\Finder;
 use Exception;
-use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
 
 class EntityExtractor
 {
@@ -28,7 +27,7 @@ class EntityExtractor
             try {
                 foreach($parser->parse($file) as $object)
                 {
-                    $this->DTOCollection[$object->getNamespace() . '\\' . $object->getName()] = $object;
+                    $this->DTOCollection[$object->getID()] = $object;
                 }
             } catch (Exception $e)
             {

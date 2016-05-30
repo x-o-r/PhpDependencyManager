@@ -4,9 +4,9 @@ namespace PhpDependencyManager\Entities;
 use PhpDependencyManager\DTO\ClassDTO;
 use PhpDependencyManager\DTO\InterfaceDTO;
 use PhpDependencyManager\DTO\ComponentDTO;
-use PhpDependencyManager\DTO\DTOInterface;
-
+use PhpDependencyManager\GraphDatabaseManager\GraphDatabaseManagerException;
 use PhpDependencyManager\GraphDatabaseManager\NodeManagerAbstract;
+use Exception;
 
 class MapEntities
 {
@@ -33,9 +33,14 @@ class MapEntities
     public function mapEntities(array $entities) {
 
         $this->entities = $entities;
-        $this->dispatchEntitiesAndCreateNamespaces();
 
-        foreach($this->objects as $object) {
+        // 1 - create all entities
+        $this->dispatchEntities();
+
+        // 2 - create undiscovered entity
+        foreach($this->objects as $objectID => $object) {
+            $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
+            $this->addRelationHelper($objectID, $object->getNamespace(), "HAS_NS"); // Link object to his namespace
             $this->rootNamespaceCollection[$object->getRootNamespace()] = null;
             $this->handleInjectedDependencies($object);
             $this->handleExtend($object);
@@ -47,7 +52,7 @@ class MapEntities
             $this->fullComponentCollection[$component->getName()] = $component;
 
             foreach ($component->getNamespaces() as $rootNamespace) {
-                $this->componentNamespaceCollection[$rootNamespace] = $component->getName();
+                $this->componentNamespaceCollection[$rootNamespace] = $component->getID();
             }
         }
 
@@ -83,51 +88,52 @@ class MapEntities
         }
     }
 
-    private function dispatchEntitiesAndCreateNamespaces()
+    private function dispatchEntities()
     {
         foreach($this->entities as $id => $entity) {
-            if ($entity instanceof ClassDTO || $entity instanceof InterfaceDTO) {
-                $this->objects[$id] = $entity;
-                $this->nodeManager->addNode(
-                    $entity->getNamespace() . '\\' . $entity->getName(),
-                    array('name' => $entity->getName()),
-                    array($this->DTONameToClassmap[get_class($entity)], 'object')
-                );
-                $this->createNamespaces($entity->getNamespace());
-            }
-            if ($entity instanceof ComponentDTO) {
-                $this->components[$id] = $entity;
-                $this->nodeManager->addNode($entity->getName(), array('name' => $entity->getName()), array('component'));
+            try {
+                if ($entity instanceof ClassDTO || $entity instanceof InterfaceDTO) {
+                    $this->objects[$id] = $entity;
+                    $this->nodeManager->addNode(
+                        $entity->getID(),
+                        array('name' => $entity->getName()),
+                        array($this->DTONameToClassmap[get_class($entity)], 'object')
+                    );
+                }
+                if ($entity instanceof ComponentDTO) {
+                    $this->components[$id] = $entity;
+                    $this->nodeManager->addNode($entity->getID(), array('name' => $entity->getName()), array('component'));
+                }
+            } catch (GraphDatabaseManagerException $e) {
+                Throw new \Exception($e);
             }
         }
-//        var_dump(array_keys($this->nodeManager->getNodeCollection())); exit;
     }
 
     private function handleUndiscoveredEntities($objectName, $contextObject, $relationType) {
 
-        $fullObjectName = $contextObject->getNamespace() . '\\' . $contextObject->getName();
+        $objectIdentifier = $contextObject->getID();
         $objectNameExploded = explode('\\', $objectName);
+        $objectNameContainsNamespace = preg_match('/\\\\/', $objectName); // Check if class name has a namespace
 
-        $instanceContainsNamespace = preg_match('/\\\\/', $objectName); // Check if class name has a namespace
-
-        if ($instanceContainsNamespace) { // Class name contains namespace and exists in $this->objects
+        if ($objectNameContainsNamespace) { // Class name contains namespace and exists in $this->objects
 
             if (array_key_exists($objectName, $this->objects)) { // Full namespace is specified in new
-                $fullInstanciatedname = $this->objects[$objectName]->getNameSpace() . '\\' . $this->objects[$objectName]->getName();
-                $this->addRelationHelper($fullObjectName, $fullInstanciatedname, $relationType);
+                $fullInstanciatedname = $this->objects[$objectName]->getID();
+                $this->addRelationHelper($objectIdentifier, $fullInstanciatedname, $relationType);
                 return;
             }
             if (array_key_exists($contextObject->getNamespace() . '\\'. $objectName, $this->objects)) { // Object namespace + full instanciated name
                 $srcObject = $this->objects[$contextObject->getNamespace() . '\\'. $objectName];
                 $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
-                $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
+                $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                 return;
             }
             foreach ($contextObject->getUses() as $use) { // Analyse Uses
                 if (array_key_exists($use.'\\'.$objectName, $this->objects)){ // Current Use + $objectName
                     $srcObject = $this->objects[$use.'\\'.$objectName];
                     $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
-                    $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
+                    $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                     return;
                 }
                 $useParts = explode('\\', $use);
@@ -136,14 +142,14 @@ class MapEntities
                     if (array_key_exists($fullParts, $this->objects)){
                         $srcObject = $this->objects[$fullParts];
                         $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
-                        $this->addRelationHelper($fullObjectName, $fullInstanciatedName, $relationType);
+                        $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                         return;
                     }
                 }
             }
         }
         if (array_key_exists($contextObject->getNamespace() . '\\' . $objectName, $this->objects)) { // Class name exists in current object's namespace
-            $this->addRelationHelper($fullObjectName, $contextObject->getNamespace() . '\\' . $objectName, $relationType);
+            $this->addRelationHelper($objectIdentifier, $contextObject->getNamespace() . '\\' . $objectName, $relationType);
             return;
         }
 
@@ -152,15 +158,15 @@ class MapEntities
         if (array_key_exists($objectName, $uses)) {
             if (array_key_exists($uses[$objectName], $this->objects)) {
                 $existingObject = $this->objects[$uses[$objectName]];
-                $this->addRelationHelper($fullObjectName, $existingObject->getNamespace() . '\\' . $existingObject->getName(), $relationType);
+                $this->addRelationHelper($objectIdentifier, $existingObject->getID(), $relationType);
                 return;
             }
         }
 
-        // Finally, $instance was not discovered, create it as undiscovered class
+        // Finally, $objectName was not discovered, create it as undiscovered class
         if (!in_array($objectName, $this->undiscoveredObject)) {
             $properties = array('name' => $objectName);
-            if ($instanceContainsNamespace) {        // If $instance contains a namespace, add it to his attributes list
+            if ($objectNameContainsNamespace) {        // If $object contains a namespace, add it to his attributes list
 
                 $namespace = $objectNameExploded[0];
                 for ($i = 1; $i < count($objectNameExploded) - 1; $i++) {
@@ -174,7 +180,7 @@ class MapEntities
 
             array_push($this->undiscoveredObject, $objectName);
         }
-        $this->addRelationHelper($contextObject->getNamespace() . '\\' . $contextObject->getName(), $objectName, $relationType);
+        $this->addRelationHelper($contextObject->getID(), $objectName, $relationType);
     }
 
     private function createNamespaces($namespace) {
@@ -186,10 +192,10 @@ class MapEntities
                 foreach ($namespaceParts as $part) {
                     if (empty($fullNamespace)){
                         $fullNamespace = $part;
-                        $this->nodeManager->addNode($fullNamespace, array('name' => $part), array("namespace"));
+                        $this->createNamespaceHelper($fullNamespace, array('name' => $part), array("namespace"));
                     } else{
                         $nodeName = $fullNamespace . '\\' . $part;
-                        $this->nodeManager->addNode($nodeName, array('name' => $part), array("namespace"));
+                        $this->createNamespaceHelper($nodeName, array('name' => $part), array("namespace"));
                         $this->nodeManager->addRelation(
                             $this->nodeManager->getNode($nodeName),
                             $this->nodeManager->getNode($fullNamespace),
@@ -200,6 +206,12 @@ class MapEntities
                 }
                 $this->namespaces[$namespace] = null;
             }
+        }
+    }
+
+    private function createNamespaceHelper($namespace, array $properties, array $labels) {
+        if (!array_key_exists($namespace, $this->namespaces)) {
+            $this->nodeManager->addNode($namespace, $properties, $labels);
         }
     }
 
@@ -226,7 +238,11 @@ class MapEntities
                     $componentName = $this->componentNamespaceCollection[$rootNamespace];
                     $component = $this->fullComponentCollection[$componentName];
 
-                    $this->nodeManager->addNode($componentName, array('name' => $component->getSubName()), array("component"));
+                    try {
+                        //$this->nodeManager->addNode($componentName, array('name' => $component->getSubName()), array("component"));
+                    } catch (Exception $e){
+                        continue;
+                    }
                     $this->nodeManager->addRelation(
                         $this->nodeManager->getNode($rootNamespace),
                         $this->nodeManager->getNode($componentName),
