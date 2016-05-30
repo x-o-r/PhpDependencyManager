@@ -33,10 +33,16 @@ class EntityExtractor
         }
     }
 
-    public function extractComponent($path) {
+    public function extractComponent($path, $rootComposerJsonFile = null) {
+
         $parser = new ComposerJsonParser();
         $finder = new Finder('json'); // @TODO : switch from Hal\Component\File\Finder to something that allows to specify a filename
-        foreach ($finder->find($path) as $file)
+        $filesToParse = $finder->find($path);
+        if ($rootComposerJsonFile !== null && file_exists($rootComposerJsonFile)) {
+            array_push($filesToParse,$rootComposerJsonFile);
+        }
+
+        foreach ($filesToParse as $file)
         {
             if (preg_match('/composer\.json/', $file)) {
                 array_push($this->DTOCollection, $parser->parse($file));

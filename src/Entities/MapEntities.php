@@ -39,13 +39,18 @@ class MapEntities
 
         // 2 - create undiscovered entities
         foreach($this->objects as $objectID => $object) {
-            $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
-            $this->addRelationHelper($objectID, $object->getNamespace(), "HAS_NS"); // Link object to his namespace
-            $this->rootNamespaceCollection[$object->getRootNamespace()] = null;
-            $this->handleInjectedDependencies($object);
-            $this->handleExtend($object);
-            $this->handleObjectInstanciation($object);
-            $this->handleInterfaceImplementation($object);
+            try {
+                $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
+                $this->addRelationHelper($objectID, $object->getNamespace(), "HAS_NS"); // Link object to his namespace
+                $this->rootNamespaceCollection[$object->getRootNamespace()] = null;
+                $this->handleInjectedDependencies($object);
+                $this->handleExtend($object);
+                $this->handleObjectInstanciation($object);
+                $this->handleInterfaceImplementation($object);
+            } catch (Exception $e) {
+                // @TODO log
+                continue;
+            }
         }
 
         foreach ($this->components as $component) {
