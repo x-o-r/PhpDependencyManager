@@ -38,7 +38,7 @@ class MapEntities
         $this->dispatchEntities();
 
         // 2 - create undiscovered entities
-        foreach($this->objects as $objectID => $object) {
+        foreach ($this->objects as $objectID => $object) {
             try {
                 $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
                 $this->addRelationHelper($objectID, $object->getNamespace(), "HAS_NS"); // Link object to his namespace
@@ -66,7 +66,7 @@ class MapEntities
     }
 
     private function handleInjectedDependencies($object) {
-        foreach($object->getInjectedDependencies() as $injectedDependency) {
+        foreach ($object->getInjectedDependencies() as $injectedDependency) {
             $this->handleUndiscoveredEntities($injectedDependency, $object, "AGGREGATE");
         }
     }
@@ -79,7 +79,7 @@ class MapEntities
 
     private function handleObjectInstanciation($object) {
         if ($object instanceof ClassDTO) {
-            foreach($object->getClassesInstances() as $instance) {
+            foreach ($object->getClassesInstances() as $instance) {
                 $this->handleUndiscoveredEntities($instance, $object, "COMPOSE");
             }
         }
@@ -87,7 +87,7 @@ class MapEntities
 
     private function handleInterfaceImplementation($object) {
         if ($object instanceof ClassDTO) {
-            foreach($object->getInterfaces() as $interface) {
+            foreach ($object->getInterfaces() as $interface) {
                 $this->handleUndiscoveredEntities($interface, $object, "IMPLEMENT");
             }
         }
@@ -95,7 +95,7 @@ class MapEntities
 
     private function dispatchEntities()
     {
-        foreach($this->entities as $id => $entity) {
+        foreach ($this->entities as $id => $entity) {
             try {
                 if ($entity instanceof ClassDTO || $entity instanceof InterfaceDTO) {
                     $this->objects[$id] = $entity;
@@ -128,25 +128,25 @@ class MapEntities
                 $this->addRelationHelper($objectIdentifier, $fullInstanciatedname, $relationType);
                 return;
             }
-            if (array_key_exists($contextObject->getNamespace() . '\\'. $objectName, $this->objects)) { // Object namespace + full instanciated name
-                $srcObject = $this->objects[$contextObject->getNamespace() . '\\'. $objectName];
-                $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
+            if (array_key_exists($contextObject->getNamespace() . '\\' . $objectName, $this->objects)) { // Object namespace + full instanciated name
+                $srcObject = $this->objects[$contextObject->getNamespace() . '\\' . $objectName];
+                $fullInstanciatedName = $srcObject->getNamespace() . '\\' . $srcObject->getname();
                 $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                 return;
             }
             foreach ($contextObject->getUses() as $use) { // Analyse Uses
-                if (array_key_exists($use.'\\'.$objectName, $this->objects)){ // Current Use + $objectName
-                    $srcObject = $this->objects[$use.'\\'.$objectName];
-                    $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
+                if (array_key_exists($use . '\\' . $objectName, $this->objects)) { // Current Use + $objectName
+                    $srcObject = $this->objects[$use . '\\' . $objectName];
+                    $fullInstanciatedName = $srcObject->getNamespace() . '\\' . $srcObject->getname();
                     $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                     return;
                 }
                 $useParts = explode('\\', $use);
-                if ($useParts[count($useParts)-1] == $objectNameExploded[0]){ // Final part of current use and first part of $objectName
+                if ($useParts[count($useParts) - 1] == $objectNameExploded[0]) { // Final part of current use and first part of $objectName
                     $fullParts = implode('\\', array_unique(array_merge($useParts, $objectNameExploded)));
-                    if (array_key_exists($fullParts, $this->objects)){
+                    if (array_key_exists($fullParts, $this->objects)) {
                         $srcObject = $this->objects[$fullParts];
-                        $fullInstanciatedName = $srcObject->getNamespace() . '\\'. $srcObject->getname();
+                        $fullInstanciatedName = $srcObject->getNamespace() . '\\' . $srcObject->getname();
                         $this->addRelationHelper($objectIdentifier, $fullInstanciatedName, $relationType);
                         return;
                     }
@@ -174,7 +174,7 @@ class MapEntities
             if ($objectNameContainsNamespace) {        // If $object contains a namespace, add it to his attributes list
 
                 $namespace = $objectNameExploded[0];
-                for ($i = 1; $i < count($objectNameExploded) - 1; $i++) {
+                for ($i = 1; $i<count($objectNameExploded) - 1; $i++) {
                     $namespace .= $objectNameExploded[$i];
                 }
                 $objectName = end($objectNameExploded);
@@ -195,10 +195,10 @@ class MapEntities
                 $fullNamespace = null;
 
                 foreach ($namespaceParts as $part) {
-                    if (empty($fullNamespace)){
+                    if (empty($fullNamespace)) {
                         $fullNamespace = $part;
                         $this->createNamespaceHelper($fullNamespace, array('name' => $part), array("namespace"));
-                    } else{
+                    } else {
                         $nodeName = $fullNamespace . '\\' . $part;
                         $this->createNamespaceHelper($nodeName, array('name' => $part), array("namespace"));
                         $this->nodeManager->addRelation(
@@ -220,8 +220,8 @@ class MapEntities
         }
     }
 
-    private function addRelationHelper($from, $to, $relationType){
-        if ($relationType === "AGGREGATE"){
+    private function addRelationHelper($from, $to, $relationType) {
+        if ($relationType === "AGGREGATE") {
             $this->nodeManager->addRelation(
                 $this->nodeManager->getNode($to),
                 $this->nodeManager->getNode($from),
@@ -255,7 +255,7 @@ class MapEntities
     private function linkComponentsToComponents() {
         foreach ($this->components as $component) {
             foreach ($component->getRequires() as $requireName => $version) {
-                if (array_key_exists($requireName, $this->fullComponentCollection)){
+                if (array_key_exists($requireName, $this->fullComponentCollection)) {
                     $this->nodeManager->addRelation(
                         $this->nodeManager->getNode($component->getName()),
                         $this->nodeManager->getNode($this->fullComponentCollection[$requireName]->getName()),

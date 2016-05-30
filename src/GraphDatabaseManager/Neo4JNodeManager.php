@@ -23,7 +23,7 @@ class Neo4JNodeManager extends NodeManagerAbstract
 
             $labelCollection = array();
 
-            foreach($labels as $label) {
+            foreach ($labels as $label) {
                 array_push($labelCollection, $this->graphDatabaseHandler->makeLabel($label));
             }
             
@@ -44,7 +44,7 @@ class Neo4JNodeManager extends NodeManagerAbstract
      * @param array|null $relationProperties
      */
     public function addRelation($startNode, $endNode, $relationType, array $relationProperties = null) {
-        if($relationProperties === null) {
+        if ($relationProperties === null) {
             $relationProperties = array();
         }
         $relation = $this->graphDatabaseHandler->makeRelationship();
@@ -58,7 +58,7 @@ class Neo4JNodeManager extends NodeManagerAbstract
      * @throws GraphDatabaseManagerException
      */
     public function getNode($nodeID) {
-        if(!array_key_exists($nodeID,$this->nodeCollection)){
+        if (!array_key_exists($nodeID, $this->nodeCollection)) {
             Throw new GraphDatabaseManagerException(__CLASS__ . ' : no node found for key ' . $nodeID);
         }
         return $this->nodeCollection[$nodeID];
