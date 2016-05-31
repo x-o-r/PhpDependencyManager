@@ -20,8 +20,10 @@ script:
 notifications:
     email: true
 
-jdk:
-  - oraclejdk8  # needed for local Neo4j 3.0+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 before_install:
   - NEO4J_VERSION=3.0.1
