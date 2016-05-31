@@ -26,6 +26,7 @@ addons:
       - oracle-java8-installer
 
 before_install:
+  - export JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre
   - NEO4J_VERSION=3.0.1
   - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
   - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
