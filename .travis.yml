@@ -17,10 +17,7 @@ script:
  
 notifications:
     email: true
-    
-services:
-  - neo4j
-  
+
 jdk:
   - oraclejdk7  # needed for local Neo4j 2.0+
 
