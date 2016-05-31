@@ -21,7 +21,7 @@ notifications:
     email: true
 
 jdk:
-  - oraclejdk7  # needed for local Neo4j 2.0+
+  - oraclejdk8  # needed for local Neo4j 3.0+
 
 before_install:
   - NEO4J_VERSION=3.0.1
