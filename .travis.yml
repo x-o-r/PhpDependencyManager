@@ -13,7 +13,7 @@ matrix:
 before_script:
     - composer self-update
     - composer install
-    - sleep 60
+    - sleep 10
  
 script:
     - ./vendor/bin/phpunit
@@ -28,6 +28,7 @@ addons:
 
 before_install:
   - export JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre
+  - export NEO4J_CONF=neo4j-community-$NEO4J_VERSION/conf
   - NEO4J_VERSION=3.0.1
   - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
   - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
