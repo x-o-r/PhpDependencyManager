@@ -29,7 +29,7 @@ addons:
 before_install:
   - export JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre
   - export NEO4J_CONF=neo4j-community-$NEO4J_VERSION/conf
-  - NEO4J_VERSION=3.0.1
+  - NEO4J_VERSION=3.0.2
   - wget dist.neo4j.org/neo4j-community-$NEO4J_VERSION-unix.tar.gz
   - tar -xzf neo4j-community-$NEO4J_VERSION-unix.tar.gz
   - sed -i s/#dbms.security.auth_enabled=false/dbms.security.auth_enabled=false/g neo4j-community-$NEO4J_VERSION/conf/neo4j.conf
