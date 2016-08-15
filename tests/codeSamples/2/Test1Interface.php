@@ -1,9 +1,9 @@
 <?php
 
-namespace Test1Namespace\Test2SubNamespace;
+namespace Test1Namespace\Test1SubNamespace;
 use Test1Namespace\TestDAO;
 
-interface Test2Interface
+interface Test1Interface
 {
     public function method(TestDAO $dao);
 }

@@ -10,4 +10,4 @@ class TestFactory
         new OutOfAnalyseClass();
         return new TestDAO(new AClass());
     }
-}
+}   

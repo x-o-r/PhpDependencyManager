@@ -8,7 +8,7 @@ use PhpDependencyManager\GraphDatabaseManager\GraphDatabaseManagerException;
 use PhpDependencyManager\GraphDatabaseManager\NodeManagerAbstract;
 use Exception;
 
-class MapEntities
+class EntityMapper
 {
     private $nodeManager;
     private $DTONameToClassmap = array(
@@ -34,10 +34,10 @@ class MapEntities
 
         $this->entities = $entities;
 
-        // 1 - create all entities
+        // 1 - Create all entities
         $this->dispatchEntities();
 
-        // 2 - create undiscovered entities
+        // 2 - Create undiscovered entities
         foreach ($this->objects as $objectID => $object) {
             try {
                 $this->createNamespaces($object->getNamespace()); // Create namespaces nodes and relations for this object
@@ -53,6 +53,7 @@ class MapEntities
             }
         }
 
+        // 3 - Handle components
         foreach ($this->components as $component) {
             $this->fullComponentCollection[$component->getName()] = $component;
 
@@ -106,8 +107,11 @@ class MapEntities
                     );
                 }
                 if ($entity instanceof ComponentDTO) {
-                    $this->components[$id] = $entity;
-                    $this->nodeManager->addNode($entity->getID(), array('name' => $entity->getName()), array('component'));
+                    $id = $entity->getID();
+                    if (!array_key_exists($id, $this->components)) {
+                        $this->components[$id] = $entity;
+                        $this->nodeManager->addNode($id, array('name' => $entity->getName()), array('component'));
+                    }
                 }
             } catch (GraphDatabaseManagerException $e) {
                 Throw new \Exception($e);
@@ -191,6 +195,7 @@ class MapEntities
     private function createNamespaces($namespace) {
         if (!empty($namespace)) {
             if (!array_key_exists($namespace, $this->namespaces)) {
+//                $this->namespaces[$namespace] = $namespace;
                 $namespaceParts = explode('\\', $namespace);
                 $fullNamespace = null;
 
@@ -209,7 +214,6 @@ class MapEntities
                         $fullNamespace = $nodeName;
                     }
                 }
-                $this->namespaces[$namespace] = null;
             }
         }
     }
@@ -217,6 +221,7 @@ class MapEntities
     private function createNamespaceHelper($namespace, array $properties, array $labels) {
         if (!array_key_exists($namespace, $this->namespaces)) {
             $this->nodeManager->addNode($namespace, $properties, $labels);
+            $this->namespaces[$namespace] = $namespace;
         }
     }
 

@@ -2,10 +2,10 @@
 
 namespace PhpDependencyManager\Bin;
 
+
 use Hoa\Iterator\Map;
-use PhpDependencyManager\Entities\MapEntities;
-use PhpDependencyManager\Extractor\EntityExtractor;
-use PhpDependencyManager\Extractor\RelationExtractor;
+use PhpDependencyManager\Entities\EntityMapper;
+use PhpDependencyManager\Entities\EntityExtractor;
 use PhpDependencyManager\FileParser\ComposerJsonParserException;
 use PhpDependencyManager\GraphDatabaseManager\Neo4JFactory;
 use PhpDependencyManager\GraphDatabaseManager\Neo4JNodeManager;
@@ -34,7 +34,7 @@ try {
     $neo4JClient = Neo4JFactory::getNeo4JClient(array('host'=>'localhost', 'port'=>'7474'));
     $neo4JNodeManager = new Neo4JNodeManager($neo4JClient);
     $neo4JNodeManager->deleteAllData();
-    $mapEntities = new MapEntities($neo4JNodeManager);
+    $mapEntities = new EntityMapper($neo4JNodeManager);
     $mapEntities->mapEntities($entityExtractor->getDTOCollection());
 } catch (ComposerJsonParserException $e){
     echo ($e . "\n");

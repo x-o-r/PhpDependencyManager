@@ -1,5 +1,5 @@
 <?php
-namespace PhpDependencyManager\Extractor;
+namespace PhpDependencyManager\Entities;
 
 use PhpDependencyManager\FileParser\PhpParser;
 use PhpDependencyManager\FileParser\ComposerJsonParser;

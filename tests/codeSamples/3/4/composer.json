@@ -7,6 +7,6 @@
 		}
   	},
     "require": {
-        "test/test1": "^3.3"
+        "test/test3": "^3.3"
     }
 }

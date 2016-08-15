@@ -6,6 +6,6 @@ class C_Class
 {
     public function __construct()
     {
-//        new A_AClass();
+       new A_AClass();
     }
 }
